@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.HomeActivity">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="@dimen/margin_toolbar"
+        android:layout_below="@+id/placeholder"
+        android:id="@+id/placeholder2"
+        />
+
+    <ImageView
+        android:id="@+id/loadingImage"
+        android:layout_below="@+id/placeholder2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/placeholder2"
+        android:layout_above="@+id/bannerContainer"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_toolbar"
+            android:layout_marginEnd="@dimen/margin_toolbar"
+            android:id="@+id/recycler_view"
+
+            />
+
+        <RelativeLayout
+            android:id="@+id/internetLostView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/recycler_view"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:layout_width="160dp"
+                android:layout_height="249dp"
+                android:src="@drawable/ic_lost_internet"
+                android:layout_centerInParent="true"
+                android:scaleType="centerInside"
+                />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/bannerContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </RelativeLayout>
+</RelativeLayout>

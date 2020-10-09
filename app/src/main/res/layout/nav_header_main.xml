@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/nav_header_height"
+    android:background="@color/white"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:elevation="20dp"
+    >
+
+
+    <ImageView
+        android:layout_above="@+id/line"
+        android:layout_width="180dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/purana_logo_new"
+        />
+    <ImageView
+        android:id="@+id/primeIndicator"
+        android:layout_above="@+id/line"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_prime_icon_24"
+        />
+   <!-- <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/nav_header_title"
+        android:textColor="@color/off_notification_color"
+        android:textSize="16sp" />-->
+<View
+    android:id="@+id/line"
+    android:layout_alignParentBottom="true"
+    android:layout_width="match_parent"
+    android:background="#DCDCDC"
+    android:layout_height="0.5dp"/>
+</RelativeLayout>

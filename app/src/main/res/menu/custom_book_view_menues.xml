@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+   <item android:id="@+id/goToPageMenu"
+       android:title="@string/go_to"/>
+    <item android:id="@+id/nightMode"
+        android:title="@string/night_mode_on"/>
+
+
+</menu>

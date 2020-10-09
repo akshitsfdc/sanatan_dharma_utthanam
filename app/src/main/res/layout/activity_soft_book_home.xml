@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.SoftBookHomeActivity">
+
+    <ImageView
+        android:id="@+id/blurImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/book_placeholder" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+    <ScrollView
+        android:layout_below="@+id/placeholder"
+        android:background="@drawable/bg_overlay_linear"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="@dimen/margin_toolbar"
+        android:layout_marginEnd="@dimen/margin_toolbar"
+        android:layout_above="@+id/getPDFButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/amaranth"
+            android:textColor="@color/colorWhiteSmoke"
+            android:textSize="16sp"
+            />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/getPDFButton"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/margin_toolbar"
+        android:layout_marginEnd="@dimen/margin_toolbar"
+        android:layout_marginBottom="5dp"
+        android:background="@color/color_leaderboard_red_trans"
+        android:shadowRadius="@android:integer/config_longAnimTime"
+        android:text="@string/getPDFButton"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:elevation="10dp"
+        android:textStyle="normal|bold"
+        />
+</RelativeLayout>

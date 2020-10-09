@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.HardCopyBookDetailsActivity">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+
+
+    <ScrollView
+        android:layout_below="@+id/placeholder"
+        android:layout_marginTop="@dimen/margin_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/booksImageCard"
+                app:cardCornerRadius="6dp"
+               android:layout_marginTop="20dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.smarteist.autoimageslider.SliderView
+                    android:id="@+id/imageSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    app:sliderAnimationDuration="600"
+                    app:sliderAutoCycleDirection="back_and_forth"
+                    app:sliderAutoCycleEnabled="true"
+                    app:sliderIndicatorAnimationDuration="600"
+                    app:sliderIndicatorGravity="center_horizontal|bottom"
+                    app:sliderIndicatorMargin="15dp"
+                    app:sliderIndicatorOrientation="horizontal"
+                    app:sliderIndicatorPadding="2dp"
+                    app:sliderIndicatorMarginBottom="3dp"
+                    app:sliderIndicatorRadius="1.5dp"
+                    app:sliderIndicatorSelectedColor="@color/colorWhiteSmoke"
+                    app:sliderIndicatorUnselectedColor="@color/dot_unselect_color"
+                    app:sliderScrollTimeInSec="5"
+                    app:sliderStartAutoCycle="true" />
+
+            </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:id="@+id/pricingLayout"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_below="@+id/booksImageCard"
+                >
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Book Name"
+                    android:textSize="14sp" />
+
+
+                    <TextView
+                        android:id="@+id/price"
+                        android:layout_below="@+id/title"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginBottom="3dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:fontFamily="sans-serif"
+                        android:text="0" />
+
+                <TextView
+                    android:id="@+id/deliveryCharge"
+                    android:layout_below="@+id/price"
+                    android:layout_marginBottom="3dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/language"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/deliveryCharge"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="2dp"
+                    android:text="Language"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:id="@+id/pages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/deliveryCharge"
+                    android:layout_toEndOf="@+id/language"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="  |  Pages: 279"
+                    android:textSize="8sp" />
+
+            </RelativeLayout>
+            <View
+                android:id="@+id/descriptionSeparator"
+                android:layout_below="@+id/pricingLayout"
+                android:layout_marginTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginEnd="40dp"
+                android:background="#6C7071"
+                />
+
+            <TextView
+                android:id="@+id/descriptionLabel"
+                android:layout_marginTop="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/descriptionSeparator"
+                android:layout_marginStart="40dp"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Description"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/descriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/descriptionLabel"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginTop="3dp"
+                android:textSize="12dp"
+                android:text="N/A"
+                 />
+            <View
+                android:layout_below="@+id/descriptionText"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"/>
+        </RelativeLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:background="@drawable/shadow_round"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:elevation="20dp"
+        >
+
+        <Button
+            android:id="@+id/addToCartButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/buttonDivider"
+            android:text="Buy Later"
+            android:background="@color/colorWhiteSmoke"
+            />
+        <View
+            android:id="@+id/buttonDivider"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            />
+        <Button
+            android:id="@+id/buyButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Buy Now"
+            android:textColor="@color/white"
+            android:background="@color/color_leaderboard_green"
+            android:layout_toEndOf="@+id/buttonDivider"/>
+    </RelativeLayout>
+</RelativeLayout>

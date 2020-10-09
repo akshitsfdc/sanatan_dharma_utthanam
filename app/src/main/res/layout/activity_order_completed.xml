@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.OrderCompletedActivity">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+
+    <ScrollView
+        android:layout_below="@+id/placeholder"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/alertImage"
+                android:layout_centerHorizontal="true"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_error_outline_red_300dp"
+                />
+
+            <TextView
+                android:id="@+id/infoText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/alertImage"
+                android:layout_marginTop="25dp"
+                android:fontFamily="@font/actor"
+                android:text="Your payment was successful and your order has been confirmed. Your order will reach you within 5-10 business days. Please contact support for any assistance."
+                android:textAlignment="center"
+                android:textSize="14sp" />
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/doneButton"
+        android:background="@drawable/rounded_button_green"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="Done"
+        android:textColor="@color/white"
+        android:elevation="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>

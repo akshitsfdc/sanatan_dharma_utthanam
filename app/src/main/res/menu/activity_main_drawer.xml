@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home_new"
+            android:title="@string/menu_home" />
+        <item
+            android:id="@+id/nav_puran"
+            android:icon="@drawable/ic_read_new"
+            android:title="@string/menu_puran" />
+        <item
+            android:id="@+id/nav_veda"
+            android:icon="@drawable/ic_read_new"
+            android:title="@string/menu_veda" />
+        <item
+            android:id="@+id/nav_geeta"
+            android:icon="@drawable/ic_read_new"
+            android:title="@string/menu_geeta" />
+        <item
+            android:id="@+id/nav_festive"
+            android:icon="@drawable/ic_read_new"
+            android:title="@string/menu_festive" />
+        <item
+            android:id="@+id/nav_hdBook"
+            android:icon="@drawable/ic_hd_new"
+            android:title="@string/menu_hd_books" />
+
+        <item
+            android:id="@+id/nav_others"
+            android:icon="@drawable/ic_more_new"
+            android:title="@string/menu_others" />
+
+        <item
+            android:id="@+id/nav_prime"
+            android:visible="false"
+            android:icon="@drawable/ic_prime_icon_24"
+            android:title="@string/menu_prime" />
+
+        <item android:title="Thoughts">
+            <menu>
+                <item
+                    android:id="@+id/nav_updesh"
+                    android:icon="@drawable/ic_thought_exchange"
+                    android:title="@string/menu_updesh" />
+
+            </menu>
+
+        </item>
+
+        <item android:title="My Books">
+            <menu>
+                <item
+                    android:id="@+id/nav_favorite"
+                    android:icon="@drawable/ic_favorite_new"
+                    android:title="@string/menu_favorite" />
+                <item
+                    android:id="@+id/nav_offline"
+                    android:icon="@drawable/ic_offline_new"
+                    android:title="@string/menu_offline" />
+            </menu>
+
+        </item>
+
+        <item android:title="Share">
+            <menu>
+                <item
+                    android:id="@+id/nav_share"
+                    android:icon="@drawable/ic_share_new"
+                    android:title="@string/menu_share" />
+
+            </menu>
+
+        </item>
+
+        <item android:title="Hard Copy">
+            <menu>
+                <item
+                    android:id="@+id/nav_buy"
+                    android:icon="@drawable/ic_hard_copy_new"
+                    android:title="@string/menu_buy" />
+
+                <item
+                    android:id="@+id/nav_orders"
+                    android:icon="@drawable/ic_bag_new"
+                    android:title="@string/menu_orders" />
+
+            </menu>
+
+        </item>
+
+        <item android:title="Support">
+            <menu>
+                <item
+                    android:id="@+id/nav_contact"
+                    android:icon="@drawable/ic_contact_new"
+                    android:title="@string/menu_contact" />
+
+            </menu>
+
+        </item>
+
+    </group>
+</menu>

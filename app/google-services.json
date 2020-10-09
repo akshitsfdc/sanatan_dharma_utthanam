@@ -1,0 +1,72 @@
+{
+  "project_info": {
+    "project_number": "611507261859",
+    "firebase_url": "https://all-puranas-in-hindi.firebaseio.com",
+    "project_id": "all-puranas-in-hindi",
+    "storage_bucket": "all-puranas-in-hindi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611507261859:android:6381281e33c4ec5f254a16",
+        "android_client_info": {
+          "package_name": "com.akshit.akshitsfdc.allpuranasinhindi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611507261859-o2j8mj4kuqm0os3rjtq5qi0dksq037l5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akshit.akshitsfdc.allpuranasinhindi",
+            "certificate_hash": "77c359af770ac33b3592d94f5db0f1f2a86b05f3"
+          }
+        },
+        {
+          "client_id": "611507261859-tnh4nh8lidj25rfus0vcgj0t1k43e0jg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akshit.akshitsfdc.allpuranasinhindi",
+            "certificate_hash": "8ee1628170f350e7ae46d4b80f1b06c8c01e9018"
+          }
+        },
+        {
+          "client_id": "611507261859-lvnk43ujbiv0gi1rhto5o69bstntcqds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akshit.akshitsfdc.allpuranasinhindi",
+            "certificate_hash": "e02fd094981e9ea9633201999ee687a0d0f9e3d4"
+          }
+        },
+        {
+          "client_id": "611507261859-m4cup8eavi0dntr2i8tfjhfu9ek92j9t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akshit.akshitsfdc.allpuranasinhindi",
+            "certificate_hash": "cb7b69ef86ab18c7a8442e717d34c1ca0d6a4016"
+          }
+        },
+        {
+          "client_id": "611507261859-segkduvde9m1a319ujcumeus0sekbm30.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCskDGFTvEp0XZSy1ANymmjmyWRdUYF7Qg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611507261859-segkduvde9m1a319ujcumeus0sekbm30.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ContactUsActivity">
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+    <RelativeLayout
+        android:layout_below="@+id/placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_toolbar"
+        android:layout_marginEnd="@dimen/margin_toolbar"
+        android:layout_marginTop="25dp"
+        >
+
+        <RelativeLayout
+            android:id="@+id/adOuterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="350dp">
+            <RelativeLayout
+                android:layout_marginTop="18dp"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+
+                <View
+                    android:layout_toStartOf="@+id/adText"
+                    android:layout_marginEnd="15dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/darker_gray"
+                    />
+                <TextView
+                    android:id="@+id/adText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="note"
+                    android:layout_centerInParent="true"
+                    android:textSize="16sp"
+                    />
+                <View
+                    android:layout_toEndOf="@+id/adText"
+                    android:layout_marginStart="15dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/darker_gray"
+                    />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/acme"
+                android:text="If you have any question, suggestion or if you want book delivery out of India please contact us."
+                android:textAlignment="center" />
+        </RelativeLayout>
+        <View
+            android:layout_below="@+id/adOuterLayout"
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_height="0.5dp"
+            android:background="@android:color/darker_gray"
+            />
+        <TextView
+            android:id="@+id/timingText"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_below="@+id/adOuterLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/acme"
+            android:text="Our working hours are from 9:00 AM to 6:00 PM IST." />
+
+        <Button
+            android:id="@+id/emailUs"
+            android:layout_below="@+id/timingText"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:elevation="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/rounded_button_blue"
+            android:text="Email Us"
+            android:textColor="#ffffff"
+            />
+
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".activities.SignUpEmailActivity">
+
+<RelativeLayout
+    android:layout_width="match_parent" android:layout_height="?actionBarSize"
+    android:background="@color/colorWhiteSmoke"
+    android:elevation="2dp"
+    >
+    <ImageView
+        android:id="@+id/backImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/ic_arrow_back_black_24dp" />
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:text="Sign Up"
+        android:textColor="@android:color/background_dark"
+        android:textSize="20sp"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="20dp"
+
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorUnderline"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>
+
+<ScrollView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <EditText
+            android:id="@+id/fieldEmail"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:inputType="textEmailAddress"
+            android:layout_height="wrap_content"
+            android:hint="Valid email"
+            />
+        <EditText
+            android:id="@+id/fieldPassword"
+            android:layout_below="@+id/fieldEmail"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:inputType="textPassword"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            />
+        <EditText
+            android:id="@+id/fieldConfirmPassword"
+            android:layout_below="@+id/fieldPassword"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:inputType="textPassword"
+            android:layout_height="wrap_content"
+            android:hint="Confirm Password"
+            />
+        <Button
+            android:id="@+id/emailCreateAccountButton"
+            android:layout_below="@+id/fieldConfirmPassword"
+            android:layout_width="match_parent"
+            android:background="@drawable/rounder_border_blue"
+            android:textColor="#ffffff"
+            android:textSize="18sp"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:text="Sign up"
+            />
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/googleSignInButton"
+            android:layout_below="@+id/emailCreateAccountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            />
+    </RelativeLayout>
+</ScrollView>
+
+<ProgressBar
+    android:id="@+id/progress"
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_centerHorizontal="true"
+    android:layout_centerInParent="true"
+    android:visibility="gone"
+    android:indeterminate="true"
+    android:elevation="20dp"
+    android:theme="@style/ProgressBarTheme"
+    />
+
+</RelativeLayout>

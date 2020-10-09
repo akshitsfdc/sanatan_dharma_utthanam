@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.SoftBookPurchaseActivity">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_height="0.5dp"
+        android:id="@+id/placeholder"
+        />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_below="@+id/placeholder"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:id="@+id/bookLayout"
+                android:layout_margin="@dimen/margin_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/bookImageCardView"
+                    android:layout_width="120dp"
+                    android:layout_height="160dp"
+                    app:cardCornerRadius="6dp"
+                    >
+                    <ImageView
+                        android:id="@+id/bookImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"
+                        />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+                        <ProgressBar
+                            android:id="@+id/progress"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerInParent="true"
+                            android:layout_centerVertical="true"
+                            android:indeterminate="true"
+                            android:elevation="10dp"
+                            android:theme="@style/ProgressBarTheme"
+                            />
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+                <RelativeLayout
+                    android:layout_toEndOf="@+id/bookImageCardView"
+                    android:padding="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_centerVertical="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_medium"
+                        android:text="Book Name"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/title"
+                        android:layout_centerVertical="true"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="3dp"
+                        android:fontFamily="@font/roboto"
+                        android:text="Price: "
+                        android:textSize="14sp" />
+
+
+
+                    <View
+                        android:id="@+id/line"
+                        android:background="@color/gGray"
+                        android:layout_marginTop="20dp"
+                        android:layout_below="@+id/price"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        />
+
+                    <TextView
+                        android:id="@+id/pages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/line"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/roboto"
+                        android:text="Pages: "
+                        android:textSize="12sp" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/buyNote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/bookLayout"
+                android:layout_marginStart="@dimen/margin_toolbar"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="@dimen/margin_toolbar"
+                android:fontFamily="@font/roboto"
+                android:text="*This is a lifetime purchase for your account, you will purchase this once and can read forever in this app."
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_marginStart="@dimen/margin_toolbar"
+                android:layout_marginEnd="@dimen/margin_toolbar"
+                android:layout_below="@+id/buyNote"
+                android:layout_marginTop="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/gGray"
+                android:textColor="@color/off_notification_color"
+                android:padding="2dp"
+                android:textSize="12sp"
+                android:fontFamily="@font/roboto"
+                android:text="Note:  No ads will be shown in purchased book."
+                />
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/primeButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_above="@+id/orText"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/button_start_bg"
+        android:fontFamily="@font/roboto"
+        android:text="Become Prime Member"
+        android:textAllCaps="false"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/orText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/videoButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/roboto"
+        android:text="OR" />
+    <Button
+        android:id="@+id/videoButton"
+        android:layout_width="match_parent"
+        android:layout_above="@+id/buyButton"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:text="Watch Video to read once"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:background="@color/color_leaderboard_yellow"
+        />
+    <Button
+        android:id="@+id/buyButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:layout_alignParentBottom="true"
+        android:text="Checkout"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:background="@color/color_leaderboard_green"
+        />
+    <ProgressBar
+        android:id="@+id/progressOuter"
+        android:visibility="gone"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:elevation="10dp"
+        android:theme="@style/ProgressBarTheme"
+        />
+</RelativeLayout>
