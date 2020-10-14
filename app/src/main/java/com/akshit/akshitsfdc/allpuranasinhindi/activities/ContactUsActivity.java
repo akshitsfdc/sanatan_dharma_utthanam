@@ -1,5 +1,6 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -19,6 +20,8 @@ import com.akshit.akshitsfdc.allpuranasinhindi.utils.FileUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.smarteist.autoimageslider.IndicatorAnimations;
+
+import java.util.Objects;
 
 public class ContactUsActivity extends MainActivity {
 
@@ -41,14 +44,42 @@ public class ContactUsActivity extends MainActivity {
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
 
-            }
+        setSupportActionBar(toolbar);
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setTitle("");
+        toolbar.setSubtitle("");
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
         });
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
+        toggle.setDrawerIndicatorEnabled(false);
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
 
         findViewById(R.id.emailUs).setOnClickListener(new View.OnClickListener() {
             @Override

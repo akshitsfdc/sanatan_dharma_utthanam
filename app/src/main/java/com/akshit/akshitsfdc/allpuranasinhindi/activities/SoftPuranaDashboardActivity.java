@@ -1,24 +1,19 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
-
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -28,26 +23,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 import com.akshit.akshitsfdc.allpuranasinhindi.adapters.SoftCopyRecyclerViewAdapter;
+import com.akshit.akshitsfdc.allpuranasinhindi.fragments.SearchFragment;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.BookDisplaySliderModel;
-import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopy;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
 import com.akshit.akshitsfdc.allpuranasinhindi.utils.FileUtils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class SoftPuranaDashboardActivity extends MainActivity {
 
@@ -71,6 +69,23 @@ public class SoftPuranaDashboardActivity extends MainActivity {
     private RelativeLayout emptyView;
     private boolean fromHome;
 
+
+    //pagination
+
+    private boolean loading = true;
+    private final int listLimit = 8;
+    private DocumentSnapshot lastVisible;
+    private boolean listended = false;
+    private int pastVisiblesItems, visibleItemCount, totalItemCount;
+
+    private GridLayoutManager mLayoutManager;
+
+    private Toolbar toolbar;
+
+    private CardView toolbarCard;
+
+    private RelativeLayout lazyProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,25 +107,60 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         recyclerView = findViewById(R.id.recycler_view);
         emptyView = findViewById(R.id.emptyView);
 
+        lazyProgress = findViewById(R.id.lazyProgress);
+
         fileUtils = new FileUtils(SoftPuranaDashboardActivity.this);
 
-
-        recyclerView.setLayoutManager(new GridLayoutManager(SoftPuranaDashboardActivity.this, 2));
+        mLayoutManager = new GridLayoutManager(SoftPuranaDashboardActivity.this, 2);
+        recyclerView.setLayoutManager(mLayoutManager);
 
         recyclerView.addItemDecoration(new DividerItemDecoration(SoftPuranaDashboardActivity.this,
                 DividerItemDecoration.VERTICAL));
         recyclerView.addItemDecoration(new DividerItemDecoration(SoftPuranaDashboardActivity.this,
                 DividerItemDecoration.HORIZONTAL));
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
 
-            }
+        toolbarCard = findViewById(R.id.toolbarCard);
+
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setTitle("");
+        toolbar.setSubtitle("");
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
         });
+        
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
+        toggle.setDrawerIndicatorEnabled(false);
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
         try {
            type = getIntent().getExtras().getString("type");
             fromHome = getIntent().getExtras().getBoolean("fromHome");
@@ -120,12 +170,19 @@ public class SoftPuranaDashboardActivity extends MainActivity {
                     fileUtils.showShortToast("No parts available");
                     emptyView.setVisibility(View.VISIBLE);
                 }else {
-                    populateList(softCopyModel.getBookParts());
+                    //populateList(softCopyModel.getBookParts());
+                    loadBookParts(softCopyModel.getBookParts());
                 }
 
+            }else if(fromHome){
+                String id = getIntent().getExtras().getString("scrollToId");
+                ArrayList<String> idList = new ArrayList<String>();
+                idList.add(id);
+                loadBookParts(idList);
             }else {
                 loadBooks(type);
             }
+
         }catch (Exception e){
             e.printStackTrace();
             loadBooks("purans");
@@ -138,7 +195,39 @@ public class SoftPuranaDashboardActivity extends MainActivity {
             itemTouchHelper.attachToRecyclerView(recyclerView);
         }
 
+
+
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+               onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    private void showSearchFragment(){
+
+        try{
+            SearchFragment searchFragment = new SearchFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.parent, searchFragment,"search_fragment");
+            transaction.addToBackStack(null);
+            transaction.commit();
+            hideToolbar();
+
+        }catch (Exception e){
+          e.printStackTrace();
+        }
+
+
+    }
+
     private void changePrime(){
         if(!MainActivity.USER_DATA.isPrimeMember()){
             Menu nav_Menu = navigationView.getMenu();
@@ -159,47 +248,20 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
         searchItem.setVisible(true);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                showSearchFragment();
                 return false;
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if(fileUtils.isNetworkConnected()){
-                    adapter.getFilter().filter(newText);
-                    return false;
-                }else {
-                    fileUtils.showShortToast("You are disconnected!");
-                    return true;
-                }
-            }
         });
-
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#6C7071")));
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#F7F7F7")));
-                }
-                return true;
-            }
-        });
-
-
         return true;
     }
     @Override
     public void onBackPressed() {
+
+        showToolBar();
+
         if(snackbarActive){
             deleteBookFiles(recentlyDeletedItem);
             deleteFromRecent(recentlyDeletedItem);
@@ -210,6 +272,7 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         }else {
             navigateToHome();
         }
+
     }
 
     private void navigateToHome(){
@@ -217,6 +280,57 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
     }
 
+    private void loadBookParts(List<String> parts){
+
+        if(!fileUtils.isNetworkConnected()){
+            fileUtils.showLongToast("You are not connected to the internet.");
+            findViewById(R.id.internetLostView).setVisibility(View.VISIBLE);
+            return;
+        }
+        if(currentUser == null){
+            fileUtils.showLongToast("You are not logged in, please log in again..");
+            return;
+        }
+
+        showPB(true);
+
+        Query query = db.collection("digital_books")
+                .whereIn("bookId", parts)
+                .orderBy("priority").limit(listLimit);
+
+        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                hidePB(true);
+                if(queryDocumentSnapshots.size() <= 0){
+
+                    fileUtils.showLongToast("No result found of this type.");
+                    emptyView.setVisibility(View.VISIBLE);
+                    // hidePB(true);
+                    listended = true;
+                    loading = true;
+                    return;
+                }
+
+                // Get the last visible document
+                lastVisible = queryDocumentSnapshots.getDocuments()
+                        .get(queryDocumentSnapshots.size()-1 );
+
+                ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
+                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                    softCopyModels.add(document.toObject(SoftCopyModel.class));
+                }
+                populateList(softCopyModels);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                hidePB(true);
+                e.printStackTrace();
+            }
+        });
+    }
     private void loadBooks(String document){
 
         if(TextUtils.equals(type, "offline")){
@@ -241,6 +355,8 @@ public class SoftPuranaDashboardActivity extends MainActivity {
             return;
         }
 
+        paginationScroll();
+
         if(!fileUtils.isNetworkConnected()){
             fileUtils.showLongToast("You are not connected to the internet.");
             findViewById(R.id.internetLostView).setVisibility(View.VISIBLE);
@@ -253,60 +369,148 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
         showPB(true);
 
-        db.collection("softCopy").document(document).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        Query query;
+
+        if(TextUtils.equals(document, "all")){
+             query = db.collection("digital_books")
+                    .whereEqualTo("isOneOfThePart", false)
+                    .orderBy("priority").limit(listLimit);
+        }else {
+            query = db.collection("digital_books")
+                    .whereEqualTo("type", document)
+                    .whereEqualTo("isOneOfThePart", false)
+                    .orderBy("priority").limit(listLimit);
+        }
+
+
+        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
-                    DocumentSnapshot documentSnapshot = task.getResult();
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
-                    if(documentSnapshot.exists()){
+                hidePB(true);
+                if(queryDocumentSnapshots.size() <= 0){
 
-                        SoftCopy softCopyDB = (SoftCopy)documentSnapshot.toObject(SoftCopy.class);
-
-                        ArrayList<SoftCopyModel> softCopyModels = softCopyDB.getSoftCopy();
-
-                        populateList(softCopyModels);
-
-                        hidePB(true);
-
-                    }else {
-                        fileUtils.showLongToast("Could not load the books try again later.");
-                        emptyView.setVisibility(View.VISIBLE);
-                        hidePB(true);
-                    }
-                }else{
-                    fileUtils.showLongToast("Could not load the books try again later.");
+                    fileUtils.showLongToast("No result found of this type.");
                     emptyView.setVisibility(View.VISIBLE);
-                    hidePB(true);
+                   // hidePB(true);
+                    listended = true;
+                    loading = true;
+                    return;
                 }
+
+                // Get the last visible document
+                lastVisible = queryDocumentSnapshots.getDocuments()
+                        .get(queryDocumentSnapshots.size()-1 );
+
+                ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
+                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                    softCopyModels.add(document.toObject(SoftCopyModel.class));
+                }
+                populateList(softCopyModels);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                hidePB(true);
+                e.printStackTrace();
             }
         });
+    }
+
+    private void loadMore(){
+
+        Log.d(TAG, "loadMore: >> type : "+type);
+        Query query;
+
+
+        if(lastVisible == null){
+            return;
+        }
+
+        if(TextUtils.equals(type, "all")){
+            query = db.collection("digital_books")
+                    .whereEqualTo("isOneOfThePart", false)
+                    .orderBy("priority")
+                    .startAfter(lastVisible)
+                    .limit(listLimit);
+        }else {
+            query = db.collection("digital_books")
+                    .whereEqualTo("type", type)
+                    .whereEqualTo("isOneOfThePart", false)
+                    .orderBy("priority")
+                    .startAfter(lastVisible)
+                    .limit(listLimit);
+        }
+
+
+
+       showLazyProgress();
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
+
+                        hideLazyProgress();
+
+                        if(documentSnapshots.size() <= 0){
+                            fileUtils.showShortToast("End of the list!");
+                            listended = true;
+                            loading = true;
+                            return;
+                        }
+                        // Get the last visible document
+                        lastVisible = documentSnapshots.getDocuments()
+                                .get(documentSnapshots.size()-1 );
+
+                        ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
+                        for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                            softCopyModels.add(document.toObject(SoftCopyModel.class));
+                        }
+
+                        adapter.addData(softCopyModels);
+                        loading = true;
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                hideLazyProgress();
+                fileUtils.showShortToast("Load failed!");
+                loading = true;
+            }
+        });
+
+
     }
     private void populateList(ArrayList<SoftCopyModel> softCopyModels){
 
         if(softCopyModels.size() <= 0){
             emptyView.setVisibility(View.VISIBLE);
         }
-        if(fromHome){
-            String scrollToId = getIntent().getExtras().getString("scrollToId");
-            int scrollToPosition = getItemPosition(softCopyModels, scrollToId);
-            adapter = new SoftCopyRecyclerViewAdapter(SoftPuranaDashboardActivity.this, softCopyModels,true, scrollToPosition, recyclerView);
-        }else {
-            adapter = new SoftCopyRecyclerViewAdapter(SoftPuranaDashboardActivity.this, softCopyModels,false, 0, recyclerView);
-        }
+        adapter = new SoftCopyRecyclerViewAdapter(SoftPuranaDashboardActivity.this, softCopyModels);
 
         recyclerView.setAdapter(adapter);
     }
-    private int getItemPosition(ArrayList<SoftCopyModel> softCopyModels, String key){
-        int position = 0;
-        for(int i = 0 ; i < softCopyModels.size(); ++i){
-            if(TextUtils.equals(softCopyModels.get(i).getBookId(), key)){
-                position = i;
-                break;
-            }
-        }
 
-        return  position;
+    private void paginationScroll(){
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) { //check for scroll down
+                    visibleItemCount = mLayoutManager.getChildCount();
+                    totalItemCount = mLayoutManager.getItemCount();
+                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+
+                    if (loading) {
+                        if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                            loading = false;
+                            if(!listended){
+                               loadMore();
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
     private void showPB(boolean loadingActive){
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
@@ -570,5 +774,19 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         }
 
         return -1;
+    }
+
+    private void showLazyProgress(){
+        lazyProgress.setVisibility(View.VISIBLE);
+    }
+    private void hideLazyProgress(){
+        lazyProgress.setVisibility(View.GONE);
+    }
+
+    private void hideToolbar(){
+        toolbarCard.setVisibility(View.GONE);
+    }
+    public void showToolBar(){
+        toolbarCard.setVisibility(View.VISIBLE);
     }
 }

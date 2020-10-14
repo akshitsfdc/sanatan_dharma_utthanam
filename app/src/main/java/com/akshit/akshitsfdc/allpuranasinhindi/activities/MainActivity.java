@@ -63,40 +63,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         permission_fn();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-
-        toolbar.setTitleTextColor(getResources().getColor(R.color.off_notification_color));
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        //toolbar.setNavigationIcon(R.drawable.ic_toolbar);
-        toolbar.setTitle("");
-        toolbar.setSubtitle("");
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//
+//        toolbar.setTitleTextColor(getResources().getColor(R.color.off_notification_color));
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        //toolbar.setNavigationIcon(R.drawable.ic_toolbar);
+//        toolbar.setTitle("");
+//        toolbar.setSubtitle("");
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         headerView = navigationView.getHeaderView(0);
 
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+//        toggle = new ActionBarDrawerToggle(
+//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
 
             /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                //hideKeyboard();
-                // Do whatever you want here
-            }
+//            public void onDrawerClosed(View view) {
+//                super.onDrawerClosed(view);
+//                //hideKeyboard();
+//                // Do whatever you want here
+//            }
 
             /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                // Do whatever you want here
-            }
-        };
+//            public void onDrawerOpened(View drawerView) {
+//                super.onDrawerOpened(drawerView);
+//                // Do whatever you want here
+//            }
+//        };
 
-        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
-
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+//        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
+//
+//        drawer.addDrawerListener(toggle);
+//        toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -113,17 +113,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
            if (!(this instanceof HomeActivity)) {
                navigateToHome();
            }
-        }else if(id == R.id.nav_puran){
+        }else if(id == R.id.nav_all){
+           navigateToSoftPuranaDashBoard("all");
+       }else if(id == R.id.nav_puran){
                 navigateToSoftPuranaDashBoard("purans");
         }else if(id == R.id.nav_veda){
                navigateToSoftPuranaDashBoard("vedas");
        }else if(id == R.id.nav_hdBook){
-               navigateToSoftPuranaDashBoard("hd_books");
+               navigateToSoftPuranaDashBoard("hd");
        }else if(id == R.id.nav_festive){
                navigateToSoftPuranaDashBoard("festive");
 
        }else if(id == R.id.nav_geeta){
-               navigateToSoftPuranaDashBoard("geeta");
+               navigateToSoftPuranaDashBoard("geetamrit");
        }else if(id == R.id.nav_others){
                navigateToSoftPuranaDashBoard("more");
        }else if(id == R.id.nav_prime){

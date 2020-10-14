@@ -16,14 +16,19 @@ public class SoftCopyModel implements Serializable {
     private String pages;
     private String bookId;
     private boolean videoOption;
-    private ArrayList<SoftCopyModel> bookParts;
+    private ArrayList<String> bookParts;
     private boolean booksInPart;
+    private boolean isOneOfThePart;
+    private int priority;
+    private String type;
+    private ArrayList<String> searchKeywords;
+
 
     public SoftCopyModel() {
     }
 
     public SoftCopyModel(String picUrl, String name, String language, boolean free, float price, String downloadUrl,
-                         String description, String fileName, String pages, String bookId, boolean videoOption, ArrayList<SoftCopyModel> bookParts,
+                         String description, String fileName, String pages, String bookId, boolean videoOption, ArrayList<String> bookParts,
                          boolean booksInPart)
     {
         this.setPicUrl(picUrl);
@@ -39,6 +44,39 @@ public class SoftCopyModel implements Serializable {
         this.setVideoOption(videoOption);
         this.setBookParts(bookParts);
         this.setBooksInPart(booksInPart);
+    }
+
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ArrayList<String> getSearchKeywords() {
+        return searchKeywords;
+    }
+
+    public void setSearchKeywords(ArrayList<String> searchKeywords) {
+        this.searchKeywords = searchKeywords;
+    }
+
+    public boolean isOneOfThePart() {
+        return isOneOfThePart;
+    }
+
+    public void setOneOfThePart(boolean oneOfThePart) {
+        isOneOfThePart = oneOfThePart;
     }
 
     public String getPicUrl() {
@@ -131,11 +169,11 @@ public class SoftCopyModel implements Serializable {
         this.videoOption = videoOption;
     }
 
-    public ArrayList<SoftCopyModel> getBookParts() {
+    public ArrayList<String> getBookParts() {
         return bookParts;
     }
 
-    public void setBookParts(ArrayList<SoftCopyModel> bookParts) {
+    public void setBookParts(ArrayList<String> bookParts) {
         this.bookParts = bookParts;
     }
 

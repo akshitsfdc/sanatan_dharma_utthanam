@@ -4,7 +4,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_puran">All Puranas</string>
+    <string name="menu_puran">Puranas</string>
     <string name="menu_veda">Vedas &amp; Upanishads</string>
     <string name="menu_geeta">Geetamrit</string>
     <string name="menu_hd_books">HD Books</string>
@@ -59,4 +59,6 @@
 
     <string name="offline_key">offline</string>
     <string name="hard_key">hard</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

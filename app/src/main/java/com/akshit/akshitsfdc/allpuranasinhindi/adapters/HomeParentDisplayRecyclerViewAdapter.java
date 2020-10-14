@@ -110,7 +110,7 @@ public class HomeParentDisplayRecyclerViewAdapter extends RecyclerView.Adapter<H
 
         RelativeLayout parent;
         RecyclerView recycler_view;
-        CardView booksImageCard;
+        RelativeLayout booksImageCard;
         SliderView imageSlider;
         TextView titleText;
         RelativeLayout bookDisplayLayout;

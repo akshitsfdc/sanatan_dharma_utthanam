@@ -1,5 +1,6 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -16,6 +17,8 @@ import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
 import com.bumptech.glide.Glide;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+
+import java.util.Objects;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
@@ -40,17 +43,46 @@ public class SoftBookHomeActivity extends MainActivity implements IUnityAdsListe
 
         textView = findViewById(R.id.textView);
         bookImageView = findViewById(R.id.blurImageView);
-
+        //
         Toolbar toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setTitle("");
+        toolbar.setSubtitle("");
+
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-
-            }
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
         });
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
+        toggle.setDrawerIndicatorEnabled(false);
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
+        //
         findViewById(R.id.getPDFButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

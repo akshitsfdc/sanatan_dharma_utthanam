@@ -30,6 +30,7 @@ import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftBookPurchaseActivi
 
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftPuranaDashboardActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
+import com.akshit.akshitsfdc.allpuranasinhindi.models.UpdeshModel;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -47,20 +48,16 @@ public class SoftCopyRecyclerViewAdapter  extends RecyclerView.Adapter<SoftCopyR
     private ArrayList<SoftCopyModel> softCopyModels;
     private ArrayList<SoftCopyModel> softCopyModelsFullCopy;
     private Context mContext;
-    private boolean fromHome;
-    private RecyclerView recyclerView;
-    private int scrollToPosition;
-    private boolean hasScrolled;
 
-    public SoftCopyRecyclerViewAdapter(Context context, ArrayList<SoftCopyModel> softCopyModels, boolean fromHome, int scrollToPosition, RecyclerView recyclerView ) {
+    public SoftCopyRecyclerViewAdapter(Context context, ArrayList<SoftCopyModel> softCopyModels ) {
         this.softCopyModels = softCopyModels;
         this.softCopyModelsFullCopy = new ArrayList<>(softCopyModels);
-        this.fromHome = fromHome;
-        this.scrollToPosition = scrollToPosition;
-        this.recyclerView = recyclerView;
         mContext = context;
     }
 
+    public void addData(ArrayList<SoftCopyModel> softCopyModels){
+        this.softCopyModels.addAll(softCopyModels);
+    }
     @NonNull
     @Override
     public SoftCopyRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -120,18 +117,22 @@ public class SoftCopyRecyclerViewAdapter  extends RecyclerView.Adapter<SoftCopyR
                     holder.price.setText("Prime");
                 }
             }
+            if(isFavorite(softCopyModel)){
+                setBookFavorite(holder.favoriteButton);
+            }else {
+                setBookNotFavorite(holder.favoriteButton);
+
+            }
         }else {
             holder.price.setTextColor(mContext.getResources().getColor(R.color.color_leaderboard_yellow));
             String s = softCopyModel.getBookParts().size()+" Parts";
             holder.price.setText(s);
-        }
-
-        if(isFavorite(softCopyModel)){
-            setBookFavorite(holder.favoriteButton);
-        }else {
-            setBookNotFavorite(holder.favoriteButton);
+            holder.favoriteButton.setEnabled(false);
+            holder.favoriteButton.setText("Expandable");
 
         }
+
+
 
         holder.favoriteButton.setOnClickListener(v -> {
             if(isFavorite(softCopyModel)){
@@ -158,15 +159,6 @@ public class SoftCopyRecyclerViewAdapter  extends RecyclerView.Adapter<SoftCopyR
                 }
             }
         });
-    }
-
-    @Override
-    public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        if(fromHome && !hasScrolled){
-            recyclerView.smoothScrollToPosition(scrollToPosition);
-            hasScrolled = true;
-        }
     }
 
     private void navigateToSoftPuranaDashBoard(String type, SoftCopyModel softCopyModel){

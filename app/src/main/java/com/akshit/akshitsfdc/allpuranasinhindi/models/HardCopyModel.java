@@ -18,6 +18,12 @@ public class HardCopyModel implements Serializable {
     private String merchant;
     private String description;
     private String pages;
+    private boolean isBook;
+    private String material;
+    private ArrayList<String> searchKeywords;
+    private String type;
+    private int priority;
+
 
     public HardCopyModel() {
     }
@@ -141,5 +147,45 @@ public class HardCopyModel implements Serializable {
 
     public void setPages(String pages) {
         this.pages = pages;
+    }
+
+    public boolean isIsBook() {
+        return isBook;
+    }
+
+    public void setIsBook(boolean book) {
+        isBook = book;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public ArrayList<String> getSearchKeywords() {
+        return searchKeywords;
+    }
+
+    public void setSearchKeywords(ArrayList<String> searchKeywords) {
+        this.searchKeywords = searchKeywords;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

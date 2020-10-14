@@ -7,7 +7,7 @@ android {
         config {
             keyAlias "key_purana"
             keyPassword "fine339933"
-            storeFile file("/home/aviraj/Android_Projects_A3K/AllPuranasInHindiNew/release_key/keys_for_all_puranas_in_hindi.jks");
+            storeFile file("C:/Users/akshi/AndroidStudioProjects/AllPuranasInHindiNew/release_key/keys_for_all_puranas_in_hindi.jks")
             storePassword "fine339933"
         }
     }
@@ -16,8 +16,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 29
         multiDexEnabled true
-        versionCode 308
-        versionName "3.8"
+        versionCode 309
+        versionName "3.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -28,7 +28,7 @@ android {
         }
 
         debug {
-            debuggable false  //to be changed false on production
+            debuggable false  
         }
     }
     compileOptions {

@@ -1,8 +1,14 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,11 +28,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import androidx.appcompat.widget.Toolbar;
+
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 import com.akshit.akshitsfdc.allpuranasinhindi.adapters.HomeParentDisplayRecyclerViewAdapter;
+import com.akshit.akshitsfdc.allpuranasinhindi.fragments.SearchFragment;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.AppInfo;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.BookDisplayCollectionModel;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.BookDisplaySliderModel;
@@ -46,13 +56,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.smarteist.autoimageslider.SliderView;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Timer;
 
 public class HomeActivity extends MainActivity implements IUnityBannerListener {
@@ -67,6 +77,9 @@ public class HomeActivity extends MainActivity implements IUnityBannerListener {
     private RecyclerView homeDisplayRecyclerView;
     private ImageView loadingImage;
     private HomeParentDisplayRecyclerViewAdapter adapter;
+
+    private Toolbar toolbar;
+    private CardView toolbarCard;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,10 +97,58 @@ public class HomeActivity extends MainActivity implements IUnityBannerListener {
         Glide.with(HomeActivity.this).load(R.drawable.loading_home_gif).into(loadingImage);
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        toolbarCard = findViewById(R.id.toolbarCard);
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+        //toolbar.setNavigationIcon(R.drawable.ic_toolbar);
+        toolbar.setTitle("");
+        toolbar.setSubtitle("");
         registerReceiver(broadcastReceiver, filter);
 
+        toggle = new ActionBarDrawerToggle(
+        this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+        /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //hideKeyboard();
+                // Do whatever you want here
+            }
+
+        /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                // Do whatever you want here
+            }
+        };
+
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.off_notification_color));
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
 
 
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchItem.setVisible(true);
+
+        searchItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                showSearchFragment();
+                return false;
+            }
+        });
+        return true;
     }
 
     private void changePrime(){
@@ -321,8 +382,21 @@ public class HomeActivity extends MainActivity implements IUnityBannerListener {
 
     @Override
     public void onBackPressed() {
+
+        showToolBar();
+
+        Fragment fr = null;
+        try {
+            fr = getSupportFragmentManager().findFragmentByTag("search_fragment");
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         if(drawer.isDrawerOpen(GravityCompat.START)){
             drawer.closeDrawer(GravityCompat.START);
+        }else if(fr != null) {
+            super.onBackPressed();
         }else{
             exitWarning();
         }
@@ -511,5 +585,27 @@ public class HomeActivity extends MainActivity implements IUnityBannerListener {
         }
         return bookDisplaySliderModels;
     }
+    private void showSearchFragment(){
 
+        try{
+            SearchFragment searchFragment = new SearchFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.parent, searchFragment,"search_fragment");
+            transaction.addToBackStack(null);
+            transaction.commit();
+            hideToolbar();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
+    private void hideToolbar(){
+        toolbarCard.setVisibility(View.GONE);
+    }
+    public void showToolBar(){
+        toolbarCard.setVisibility(View.VISIBLE);
+    }
 }

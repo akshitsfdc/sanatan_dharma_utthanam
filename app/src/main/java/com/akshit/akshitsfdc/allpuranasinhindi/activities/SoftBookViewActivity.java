@@ -601,7 +601,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
                 return;
             }
         }
-        ArrayList<SoftCopyModel> softCopyModels;
+        ArrayList<String> softCopyModels;
         if(softCopyModel.getBookParts() == null){
             softCopyModels = new ArrayList<>();
         }else {

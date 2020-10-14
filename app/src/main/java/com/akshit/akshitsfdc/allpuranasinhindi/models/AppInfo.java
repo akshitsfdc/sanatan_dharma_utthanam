@@ -16,12 +16,21 @@ public class AppInfo {
     private String paymentApiSandbox;
     private ArrayList<SliderModel> bannerUrls;
     private int primePrice;
-
     private ArrayList<BookDisplayCollectionModel> bookDisplayCollection;
+
+    private boolean saveSearchAnalytics;
 
     public AppInfo() {
     }
 
+
+    public boolean isSaveSearchAnalytics() {
+        return saveSearchAnalytics;
+    }
+
+    public void setSaveSearchAnalytics(boolean saveSearchAnalytics) {
+        this.saveSearchAnalytics = saveSearchAnalytics;
+    }
 
     public String getLatestVersion() {
         return latestVersion;

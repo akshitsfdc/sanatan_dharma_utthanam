@@ -11,17 +11,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.AddressDetailsActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.HardCopyBookDetailsActivity;
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.MainActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.HardCopyModel;
-import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -35,17 +31,15 @@ public class HardCopyRecyclerViewAdapter extends RecyclerView.Adapter<HardCopyRe
 
     private ArrayList<HardCopyModel> hardCopyModels;
     private Context mContext;
-    private boolean fromHome;
-    private RecyclerView recyclerView;
-    private int scrollToPosition;
     private boolean hasScrolled;
 
-    public HardCopyRecyclerViewAdapter(Context context, ArrayList<HardCopyModel> hardCopyModels, boolean fromHome, int scrollToPosition, RecyclerView recyclerView ) {
+    public HardCopyRecyclerViewAdapter(Context context, ArrayList<HardCopyModel> hardCopyModels) {
         this.hardCopyModels = hardCopyModels;
         mContext = context;
-        this.fromHome = fromHome;
-        this.scrollToPosition = scrollToPosition;
-        this.recyclerView = recyclerView;
+    }
+
+    public void addData(ArrayList<HardCopyModel> hardCopyModels){
+        this.hardCopyModels.addAll(hardCopyModels);
     }
 
     @NonNull
@@ -61,8 +55,13 @@ public class HardCopyRecyclerViewAdapter extends RecyclerView.Adapter<HardCopyRe
         HardCopyModel hardCopyModel = hardCopyModels.get(position);
 
         holder.title.setText(hardCopyModel.getName());
+
         holder.language.setText(hardCopyModel.getLanguage());
 
+        Log.d("TAG", "onBindViewHolder: hardCopyModel.isBook() "+hardCopyModel.isIsBook());
+        if(!hardCopyModel.isIsBook()){
+            holder.language.setVisibility(View.GONE);
+        }
 
         Glide.with(mContext).load(hardCopyModel.getPicUrl()).listener(new RequestListener<Drawable>() {
             @Override
@@ -113,16 +112,6 @@ public class HardCopyRecyclerViewAdapter extends RecyclerView.Adapter<HardCopyRe
             }
         });
 
-    }
-
-    @Override
-    public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        if(fromHome && !hasScrolled){
-            recyclerView.smoothScrollToPosition(scrollToPosition);
-            Log.d("scrollToPosition", "onBindViewHolder: scrollToPosition called");
-            hasScrolled = true;
-        }
     }
 
     private void navigateToBookDetails(HardCopyModel hardCopyModel){
