@@ -10,23 +10,23 @@
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_all"
-            android:icon="@drawable/ic_read_new"
+            android:icon="@drawable/ic_book_icon"
             android:title="All" />
         <item
             android:id="@+id/nav_puran"
-            android:icon="@drawable/ic_read_new"
+            android:icon="@drawable/ic_book_icon"
             android:title="@string/menu_puran" />
         <item
             android:id="@+id/nav_veda"
-            android:icon="@drawable/ic_read_new"
+            android:icon="@drawable/ic_book_icon"
             android:title="@string/menu_veda" />
         <item
             android:id="@+id/nav_geeta"
-            android:icon="@drawable/ic_read_new"
+            android:icon="@drawable/ic_book_icon"
             android:title="@string/menu_geeta" />
         <item
             android:id="@+id/nav_festive"
-            android:icon="@drawable/ic_read_new"
+            android:icon="@drawable/ic_book_icon"
             android:title="@string/menu_festive" />
         <item
             android:id="@+id/nav_hdBook"
@@ -80,28 +80,28 @@
 
         </item>
 
-        <item android:title="Hard Copy">
-            <menu>
-                <item
-                    android:id="@+id/nav_buy"
-                    android:icon="@drawable/ic_hard_copy_new"
-                    android:title="@string/menu_buy" />
-
-                <item
-                    android:id="@+id/nav_orders"
-                    android:icon="@drawable/ic_bag_new"
-                    android:title="@string/menu_orders" />
-
-            </menu>
-
-        </item>
-
         <item android:title="Support">
             <menu>
                 <item
                     android:id="@+id/nav_contact"
                     android:icon="@drawable/ic_contact_new"
                     android:title="@string/menu_contact" />
+
+            </menu>
+
+        </item>
+
+        <item android:title="Account">
+            <menu>
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/ic_baseline_logout_24"
+                    android:title="@string/logout" />
+
+                <item
+                    android:id="@+id/nav_login"
+                    android:icon="@drawable/ic_baseline_login_24"
+                    android:title="Login" />
 
             </menu>
 

@@ -18,20 +18,26 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
+import com.akshit.akshitsfdc.allpuranasinhindi.activities.BaseActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.MainActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftBookHomeActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftBookPurchaseActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftPuranaDashboardActivity;
+import com.akshit.akshitsfdc.allpuranasinhindi.activities.SplashActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
+import com.akshit.akshitsfdc.allpuranasinhindi.service.SQLService;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -45,12 +51,18 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
 
     private ArrayList<SoftCopyModel> softCopyModels;
     private ArrayList<SoftCopyModel> softCopyModelsFullCopy;
-    private Context mContext;
+    private AppCompatActivity mContext;
+    private SQLService sqlService;
+    private List<String> favoriteBookIds;
+    private BaseActivity baseActivity;
 
-    public SearchSoftBooksRecyclerViewAdapter(Context context, ArrayList<SoftCopyModel> softCopyModels ) {
+    public SearchSoftBooksRecyclerViewAdapter(AppCompatActivity context, ArrayList<SoftCopyModel> softCopyModels ) {
         this.softCopyModels = softCopyModels;
         this.softCopyModelsFullCopy = new ArrayList<>(softCopyModels);
         mContext = context;
+        baseActivity = (BaseActivity)mContext;
+        sqlService = new SQLService(context);
+        loadListOfFavorite();
     }
 
     public void addData(ArrayList<SoftCopyModel> softCopyModels){
@@ -72,6 +84,7 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
 
         holder.title.setText(softCopyModel.getName());
         holder.language.setText(softCopyModel.getLanguage());
+        holder.pagesValue.setText(softCopyModel.getPages());
 
 
         Glide.with(mContext).load(softCopyModel.getPicUrl()).listener(new RequestListener<Drawable>() {
@@ -89,13 +102,12 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
         }).error(R.drawable.book_placeholder).fallback(R.drawable.book_placeholder).into( holder.bookImage);
 
         if(!softCopyModel.isBooksInPart()) {
-            if (!MainActivity.USER_DATA.isPrimeMember()) {
+            if (SplashActivity.USER_DATA == null ||  !SplashActivity.USER_DATA.isPrimeMember()) {
                 if (softCopyModel.isFree()) {
                     holder.price.setTextColor(mContext.getResources().getColor(R.color.color_leaderboard_green));
                     holder.price.setText("Free");
                 } else {
                     holder.price.setTextColor(mContext.getResources().getColor(R.color.gblue));
-                    DecimalFormat df = new DecimalFormat("#");
                     String text;
                     if (isPurchased(softCopyModel.getBookId())) {
                         holder.price.setTextColor(mContext.getResources().getColor(R.color.color_leaderboard_green));
@@ -134,98 +146,104 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
 
         holder.favoriteButton.setOnClickListener(v -> {
             if(isFavorite(softCopyModel)){
-                removeFavorite(holder.favoriteButton, softCopyModel, holder.progress);
+                removeFavorite(holder.favoriteButton, softCopyModel);
             }else{
-                addToFavorite(holder.favoriteButton, softCopyModel, holder.progress);
+                addToFavorite(holder.favoriteButton, softCopyModel);
             }
         } );
 
         boolean finalPurchased = purchased;
-        holder.bookImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(softCopyModel.isBooksInPart()){
+        holder.bookImage.setOnClickListener(v -> {
+            if(softCopyModel.isBooksInPart()){
 
-                    navigateToSoftPuranaDashBoard("parts", softCopyModel);
-                    return;
-                }
+                navigateToSoftPuranaDashBoard("parts", softCopyModel);
+                return;
+            }
 
-                if(softCopyModel.isFree() || finalPurchased || MainActivity.USER_DATA.isPrimeMember()){
-                    navigateToBookHome(softCopyModel);
-                }else {
-                    navigateToBookPurchase(softCopyModel);
-                }
+            if(softCopyModel.isFree() || finalPurchased ||
+                    (SplashActivity.USER_DATA != null && SplashActivity.USER_DATA.isPrimeMember())){
+                navigateToBookHome(softCopyModel);
+            }else {
+                navigateToBookPurchase(softCopyModel);
             }
         });
     }
 
     private void navigateToSoftPuranaDashBoard(String type, SoftCopyModel softCopyModel){
-        Intent intent = new Intent(mContext, SoftPuranaDashboardActivity.class);
-        intent.putExtra("type", type);
-        intent.putExtra("softCopyModel",softCopyModel);
-        mContext.startActivity(intent);
+
+        baseActivity.routing.clearParams();
+        baseActivity.routing.appendParams("singleBook", false);
+        baseActivity.routing.appendParams("type", type);
+        baseActivity.routing.appendParams("fromHome", false);
+        baseActivity.routing.appendParams("softCopyModel", softCopyModel);
+        baseActivity.routing.navigate(SoftPuranaDashboardActivity.class, false);
         //finish();
     }
 
     private void setBookFavorite(Button button){
-        final int sdk = android.os.Build.VERSION.SDK_INT;
-        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            button.setBackgroundDrawable(ContextCompat.getDrawable(mContext, R.drawable.bordered_button_blue) );
-        } else {
-            button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.bordered_button_blue));
-        }
+        ((MaterialButton)button).setStrokeColor(AppCompatResources.getColorStateList(mContext, R.color.primary));
+        ((MaterialButton)button).invalidate();
         button.setText("- Favorite");
         button.setTextColor(Color.parseColor("#4285F4"));
     }
     private void setBookNotFavorite(Button button){
-        final int sdk = android.os.Build.VERSION.SDK_INT;
-        if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            button.setBackgroundDrawable(ContextCompat.getDrawable(mContext, R.drawable.bordered_button_green) );
-        } else {
-            button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.bordered_button_green));
-        }
+        ((MaterialButton)button).setStrokeColor(AppCompatResources.getColorStateList(mContext, R.color.secondary));
+        ((MaterialButton)button).invalidate();
         button.setText("+ Favorite");
         button.setTextColor(Color.parseColor("#0F9D58"));
     }
 
     private boolean isFavorite(SoftCopyModel softCopyModel){
 
-        SoftCopyModel favBook = getFavoriteBookReference(loadFavBooks(), softCopyModel);
+        for (String id:favoriteBookIds
+        ) {
+            if(TextUtils.equals(id, softCopyModel.getBookId())){
+                return true;
+            }
 
-        return favBook != null;
+        }
+        return false;
     }
 
-    private void addToFavorite(Button favoriteButton, SoftCopyModel softCopyModel, ProgressBar progress){
+    private void addToFavorite(Button favoriteButton, SoftCopyModel softCopyModel){
 
-        progress.setVisibility(View.VISIBLE);
-        favoriteButton.setEnabled(false);
-
-        saveData(softCopyModel);
-
+        softCopyModel.setFavorite(true);
         setBookFavorite(favoriteButton);
-        favoriteButton.setEnabled(true);
-        notifyDataSetChanged();
-        progress.setVisibility(View.GONE);
+        long result = sqlService.updateUpdateFavorite(softCopyModel);
+        if(result > 0 ){
+            String msg = softCopyModel.getName()+" Added to your favorite list";
+            baseActivity.uiUtils.showShortSuccessSnakeBar(msg);
+        }else {
+            String msg = softCopyModel.getName()+" Could not be removed from your favorite list, try again later";
+            baseActivity.uiUtils.showShortErrorSnakeBar(msg);
+        }
+        loadListOfFavorite();
 
     }
-    private void removeFavorite(Button favoriteButton, SoftCopyModel softCopyModel, ProgressBar progress){
+    private void removeFavorite(Button favoriteButton, SoftCopyModel softCopyModel){
 
-        progress.setVisibility(View.VISIBLE);
-        favoriteButton.setEnabled(false);
-        notifyDataSetChanged();
-
-        deleteData(softCopyModel);
-
+        softCopyModel.setFavorite(false);
         setBookNotFavorite(favoriteButton);
-        notifyDataSetChanged();
-        favoriteButton.setEnabled(true);
-        progress.setVisibility(View.GONE);
+
+        long result = sqlService.updateUpdateFavorite(softCopyModel);
+        if(result > 0 ){
+            String msg = softCopyModel.getName()+" Removed from your favorite list";
+            baseActivity.uiUtils.showShortSnakeBar(msg);
+        }else {
+            String msg = softCopyModel.getName()+" Removed from favorite list";
+            baseActivity.uiUtils.showShortErrorSnakeBar(softCopyModel.getName()+" Could not be removed from your favorite list, try again later");
+        }
+        loadListOfFavorite();
     }
 
     private boolean isPurchased(String bookId){
 
+        if(SplashActivity.USER_DATA == null){
+            return false;
+        }
+
         boolean purchased = false;
-        ArrayList<SoftCopyModel> softCopyModels = MainActivity.USER_DATA.getPurchasedBooks();
+        List<SoftCopyModel> softCopyModels = SplashActivity.USER_DATA.getPurchasedBooks();
 
         for (SoftCopyModel softCopyModel : softCopyModels){
             if(TextUtils.equals(softCopyModel.getBookId(), bookId)){
@@ -237,14 +255,15 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
         return purchased;
     }
     private void navigateToBookHome(SoftCopyModel softCopyModel){
-        Intent intent = new Intent(mContext, SoftBookHomeActivity.class);
-        intent.putExtra("softCopyModel",softCopyModel);
-        mContext.startActivity(intent);
+        baseActivity.routing.clearParams();
+        baseActivity.routing.appendParams("softCopyModel", softCopyModel);
+        baseActivity.routing.navigate(SoftBookHomeActivity.class, false);
     }
     private void navigateToBookPurchase(SoftCopyModel softCopyModel){
-        Intent intent = new Intent(mContext, SoftBookPurchaseActivity.class);
-        intent.putExtra("softCopyModel",softCopyModel);
-        mContext.startActivity(intent);
+
+        baseActivity.routing.clearParams();
+        baseActivity.routing.appendParams("softCopyModel", softCopyModel);
+        baseActivity.routing.navigate(SoftBookPurchaseActivity.class, false);
     }
     @Override
     public int getItemCount() {
@@ -298,7 +317,8 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
         TextView language;
         TextView price;
         ProgressBar progress;
-        Button favoriteButton;
+        MaterialButton favoriteButton;
+        TextView pagesValue;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -308,69 +328,14 @@ public class SearchSoftBooksRecyclerViewAdapter  extends RecyclerView.Adapter<Se
             price = itemView.findViewById(R.id.price);
             progress = itemView.findViewById(R.id.progress);
             favoriteButton = itemView.findViewById(R.id.favoriteButton);
+            pagesValue = itemView.findViewById(R.id.pagesValue);
         }
     }
 
-    private void saveData(SoftCopyModel offlineBook) {
 
-        ArrayList<SoftCopyModel> offlineBookList = loadFavBooks();
 
-        offlineBookList.add(offlineBook);
 
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("offline_book_list", mContext.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(offlineBookList);
-        editor.putString("favoriteBookList", json);
-        editor.apply();
-    }
-    private void deleteData(SoftCopyModel favBook) {
-
-        ArrayList<SoftCopyModel> offlineBookList = loadFavBooks();
-
-        SoftCopyModel bookModel = getFavoriteBookReference(offlineBookList, favBook);
-
-        if(bookModel != null){
-            if(offlineBookList.contains(bookModel)){
-                offlineBookList.remove(bookModel);
-            }
-        }
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("offline_book_list", mContext.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(offlineBookList);
-        editor.putString("favoriteBookList", json);
-        editor.apply();
-    }
-    private ArrayList<SoftCopyModel> loadFavBooks() {
-
-        ArrayList<SoftCopyModel> favList;
-
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("offline_book_list", mContext.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("favoriteBookList", null);
-        Type type = new TypeToken<ArrayList<SoftCopyModel>>() {}.getType();
-        favList = gson.fromJson(json, type);
-
-        if (favList == null) {
-            favList = new ArrayList<>();
-        }
-
-        return favList;
-    }
-
-    private SoftCopyModel getFavoriteBookReference(ArrayList<SoftCopyModel> softCopyModels, SoftCopyModel bookModel){
-        SoftCopyModel book = null;
-
-        for(SoftCopyModel softCopyModel : softCopyModels){
-            if(TextUtils.equals(softCopyModel.getBookId(), bookModel.getBookId())){
-                book = softCopyModel;
-                break;
-            }
-        }
-
-        return book;
+    private void loadListOfFavorite(){
+        favoriteBookIds = sqlService.getFavoriteBookIds();
     }
 }

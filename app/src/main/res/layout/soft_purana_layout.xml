@@ -1,105 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="@dimen/margin_softbook"
-    android:paddingStart="@dimen/margin_toolbar"
-    android:paddingEnd="@dimen/margin_toolbar"
-    android:paddingBottom="10dp"
-    android:paddingTop="10dp">
+    android:paddingStart="15dp"
+    android:paddingEnd="15dp"
+    android:paddingBottom="25dp"
+    android:paddingTop="25dp">
 
     <RelativeLayout
         android:id="@+id/bookImageOuter"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent" >
+
+
+
+
         <androidx.cardview.widget.CardView
 
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            app:cardCornerRadius="8dp"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="10dp"
             >
-            <ImageView
-                android:id="@+id/bookImage"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/book_placeholder"
-                android:layout_centerHorizontal="true"
-                android:scaleType="fitXY" />
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/bookImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/book_placeholder"
+                    android:layout_centerHorizontal="true"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
+                    android:id="@+id/ribbonImage"
+                    android:visibility="gone"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_prime"
+                    />
+            </RelativeLayout>
+
         </androidx.cardview.widget.CardView>
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
 
-            android:layout_centerVertical="true"
-            android:indeterminate="true"
-            android:elevation="10dp"
-            android:theme="@style/ProgressBarTheme"
-            />
-    </RelativeLayout>
+        <androidx.cardview.widget.CardView
 
-
-    <RelativeLayout
-        android:layout_marginTop="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_below="@+id/bookImageOuter"
-        >
-
-        <TextView
-            android:id="@+id/title"
+            android:id="@+id/favoriteCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="3dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Book Name"
-            android:textSize="14sp" />
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentEnd="true"
+            app:cardBackgroundColor="@android:color/transparent"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
 
-        <TextView
-            android:id="@+id/language"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
-            android:textSize="10sp"
-            android:fontFamily="sans-serif-condensed-medium"
-            android:text="Language" />
+                android:id="@+id/favoriteButton"
+                android:layout_width="@dimen/favorite_button_size"
+                android:layout_height="@dimen/favorite_button_size"
 
-        <TextView
-            android:id="@+id/price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
-            android:layout_toEndOf="@+id/language"
-            android:layout_marginBottom="5dp"
-            android:textSize="10sp"
-            android:layout_marginStart="10dp"
-            android:fontFamily="sans-serif-condensed-medium"
-            android:text="Free" />
+                android:src="@drawable/ic_favorite_inactive"
+                />
+        </androidx.cardview.widget.CardView>
 
-        <RelativeLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
+            android:orientation="vertical"
+            app:cardBackgroundColor="@android:color/transparent"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/price"
             >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                >
 
-            <Button
-                android:id="@+id/favoriteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_alignParentBottom="true"
-                android:background="@drawable/bordered_button_blue"
-                android:fontFamily="sans-serif-medium"
-                android:text="+ Favorite"
-                android:textAllCaps="false"
-                android:textColor="@color/color_leaderboard_blue"
-                android:textSize="12sp" />
-        </RelativeLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="15dp"
+                    android:layout_gravity="center"
+                    android:background="@color/overlay_var"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:gravity="center"
+                    >
+
+                    <ImageView
+                        android:layout_width="@dimen/book_meta_dot_size"
+                        android:layout_height="@dimen/book_meta_dot_size"
+                        android:src="@drawable/ic_white_dot"
+                        android:layout_marginTop="@dimen/book_meta_dot_top"
+                        android:scaleType="centerCrop"
+                        />
+
+                        <TextView
+                            android:id="@+id/language"
+                            android:layout_marginStart="@dimen/book_meta_margins"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/book_meta_size"
+                            android:fontFamily="@font/roboto"
+                            android:textColor="@color/white"
+                            android:textAlignment="center"
+                            android:text="Language" />
+
+
+                    <ImageView
+                        android:layout_width="@dimen/book_meta_dot_size"
+                        android:layout_height="@dimen/book_meta_dot_size"
+                        android:layout_marginStart="@dimen/book_meta_margins"
+                        android:src="@drawable/ic_white_dot"
+                        android:scaleType="centerCrop"
+                        android:layout_marginTop="@dimen/book_meta_dot_top"
+                        />
+
+
+                        <TextView
+                            android:id="@+id/price"
+
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/book_meta_size"
+                            android:layout_marginStart="@dimen/book_meta_margins"
+                            android:fontFamily="@font/roboto"
+                            android:textColor="@color/white"
+                            android:textAlignment="center"
+                            android:text="Free" />
+
+                    <ImageView
+                        android:layout_width="@dimen/book_meta_dot_size"
+                        android:layout_height="@dimen/book_meta_dot_size"
+                        android:layout_marginStart="@dimen/book_meta_margins"
+                        android:src="@drawable/ic_white_dot"
+                        android:scaleType="centerCrop"
+                        android:layout_marginTop="@dimen/book_meta_dot_top"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/overlay"
+                    >
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="10dp"
+                        >
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/roboto_bold"
+                            android:textColor="@color/white"
+                            android:text="Book Name"
+                            android:layout_gravity="center"
+                            android:textSize="30sp" />
+
+
+
+
+<!--                        <com.google.android.material.button.MaterialButton-->
+<!--                            android:visibility="gone"-->
+<!--                            android:id="@+id/favoriteButton"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_alignParentBottom="true"-->
+<!--                            android:fontFamily="sans-serif-medium"-->
+<!--                            android:text="+ Favorite"-->
+<!--                            android:textAllCaps="false"-->
+<!--                            android:textColor="@color/color_leaderboard_blue"-->
+<!--                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+<!--                            app:strokeColor="@color/primary"-->
+<!--                            android:textSize="12sp" />-->
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+
+
+
     </RelativeLayout>
+
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminate="true"
+        app:trackColor="@color/loading_ma"
+        app:indicatorColor="@color/loading_mi"
+        app:trackThickness="1500dp"
+        />
+
 </RelativeLayout>

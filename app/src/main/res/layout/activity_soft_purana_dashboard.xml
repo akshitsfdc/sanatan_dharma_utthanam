@@ -38,6 +38,7 @@
             </androidx.appcompat.widget.Toolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
+
     </androidx.cardview.widget.CardView>
 
     <include
@@ -46,6 +47,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         />
+
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
@@ -56,6 +59,14 @@
         android:id="@+id/recycler_view"
         />
 
+
+        <include
+            android:id="@+id/snakebarLayout"
+            android:layout_below="@+id/placeholder"
+            android:layout_marginTop="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/top_snakbar_layout" />
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="70dp"

@@ -26,7 +26,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.ArrayList;
 
@@ -42,6 +41,7 @@ public class UpdeshActivity extends MainActivity {
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
     private UpdeshRecyclerViewAdapter adapter;
     private LinearLayoutManager mLayoutManager;
+
     private ArrayList<UpdeshModel> updeshModels;
 
     private DocumentSnapshot lastVisible;
@@ -54,28 +54,27 @@ public class UpdeshActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_updesh);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         updeshActivity = this;
 
-        findViewById(R.id.backImageView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
+        findViewById(R.id.backImageView).setOnClickListener(v -> onBackPressed());
+        findViewById(R.id.addUpdeshImageView).setOnClickListener(v -> {
+           if(!fireAuthService.isUserLoggedIn()){
+               routing.navigate(LoginActivity.class, false);
+           }else {
+               showPostFragment();
+           }
+
+        });
+        findViewById(R.id.addUpdeshActivity).setOnClickListener(v -> {
+            if(!fireAuthService.isUserLoggedIn()){
+                routing.navigate(LoginActivity.class, false);
+            }else {
+                showPostFragment();
             }
-        });
-        findViewById(R.id.addUpdeshImageView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               // addUpdesh();
-                showPostFragment();         }
-        });
-        findViewById(R.id.addUpdeshActivity).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // addUpdesh();
-                showPostFragment();         }
+
         });
         fileUtils = new FileUtils(UpdeshActivity.this);
         db = FirebaseFirestore.getInstance();
@@ -87,8 +86,6 @@ public class UpdeshActivity extends MainActivity {
         paginationScroll();
 
         loadUpdesha(true);
-
-
     }
 
     private void showPostFragment(){
@@ -101,13 +98,13 @@ public class UpdeshActivity extends MainActivity {
         transaction.commit();
     }
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 101 && adapter != null){
-            adapter.onActivityResult(requestCode, resultCode, data);
-        }else if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
-            postFragment.profileUpdateFragment.onActivityResult(requestCode, resultCode, data);
-        }
+//        if(requestCode == 101 && adapter != null){
+//            adapter.onActivityResult(requestCode, resultCode, data);
+//        }else if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+//            postFragment.profileUpdateFragment.onActivityResult(requestCode, resultCode, data);
+//        }
 
     }
     private void paginationScroll(){
@@ -148,33 +145,30 @@ public class UpdeshActivity extends MainActivity {
 
     showPB(true);
         query.get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot documentSnapshots) {
+                .addOnSuccessListener(documentSnapshots -> {
 
-                        if(documentSnapshots.size() <= 0){
-                            fileUtils.showShortToast("End of the list!");
-                            listended = true;
-                            loading = true;
-                            hidePB(true);
-                            return;
-                        }
-                        // Get the last visible document
-                       lastVisible = documentSnapshots.getDocuments()
-                                .get(documentSnapshots.size()-1 );
-
-                        ArrayList<UpdeshModel> updeshModels = new ArrayList<>();
-                        for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
-                            updeshModels.add(document.toObject(UpdeshModel.class));
-                        }
-                        if(isFirstTime){
-                            populateList(updeshModels);
-                        }else {
-                            adapter.addData(updeshModels);
-                        }
-                        hidePB(true);
+                    if(documentSnapshots.size() <= 0){
+                        fileUtils.showShortToast("End of the list!");
+                        listended = true;
                         loading = true;
+                        hidePB(true);
+                        return;
                     }
+                    // Get the last visible document
+                   lastVisible = documentSnapshots.getDocuments()
+                            .get(documentSnapshots.size()-1 );
+
+                    ArrayList<UpdeshModel> updeshModels = new ArrayList<>();
+                    for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                        updeshModels.add(document.toObject(UpdeshModel.class));
+                    }
+                    if(isFirstTime){
+                        populateList(updeshModels);
+                    }else {
+                        adapter.addData(updeshModels);
+                    }
+                    hidePB(true);
+                    loading = true;
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {

@@ -1,5 +1,6 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -7,16 +8,23 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
 import com.bumptech.glide.Glide;
-import com.unity3d.ads.IUnityAdsListener;
-import com.unity3d.ads.UnityAds;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import java.util.Objects;
 
@@ -24,11 +32,14 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class SoftBookHomeActivity extends MainActivity implements IUnityAdsListener {
+public class SoftBookHomeActivity extends MainActivity {
 
+    private final String TAG = "SoftBookHomeActivity";
     private ImageView bookImageView;
     private SoftCopyModel softCopyModel;
     private TextView textView;
+    private InterstitialAd mInterstitialAd;
+    private ProgressBar progressOuter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +54,7 @@ public class SoftBookHomeActivity extends MainActivity implements IUnityAdsListe
 
         textView = findViewById(R.id.textView);
         bookImageView = findViewById(R.id.blurImageView);
+        progressOuter = findViewById(R.id.progressOuter);
         //
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -86,75 +98,133 @@ public class SoftBookHomeActivity extends MainActivity implements IUnityAdsListe
         findViewById(R.id.getPDFButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setFullScreenAdListeners();
-
                 navigateToBookView();
+                showAds();
             }
         });
-        Intent intent=getIntent();
-        softCopyModel =(SoftCopyModel) intent.getSerializableExtra("softCopyModel");
+        softCopyModel = (SoftCopyModel)routing.getParam("softCopyModel");
+//        Intent intent=getIntent();
+//        softCopyModel =(SoftCopyModel) intent.getParcelableExtra("softCopyModel");
 
         if(softCopyModel != null){
             setupDetails();
         }
 
-        UnityAds.addListener(this);
+
+        if( SplashActivity.USER_DATA == null || (!SplashActivity.USER_DATA.isPrimeMember() && !MainActivity.DOWNLOAD_IN_PROGRESS)) {
+
+            if(softCopyModel.isFree()){
+                initAd();
+            }
+
+        }
+
+    }
+
+    private void showPB(boolean loadingActive){
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        if(loadingActive){
+            progressOuter.setVisibility(View.VISIBLE);
+        }
+
+
+    }
+    private void hidePB(boolean loadingActive){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        if(loadingActive) {
+            progressOuter.setVisibility(View.GONE);
+        }
+
+    }
+
+    private void initAd(){
+
+        if(SplashActivity.APP_INFO == null){
+            return;
+        }
+        showPB(true);
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        InterstitialAd.load(this,SplashActivity.APP_INFO.getDownloadingGapAdId().trim(), adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                        Log.i(TAG, "onAdLoaded");
+                        setupAdListeners();
+                        hidePB(true);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        Log.i(TAG, loadAdError.getMessage());
+                        mInterstitialAd = null;
+                        hidePB(true);
+                    }
+                });
+
+    }
+    private void setupAdListeners(){
+
+        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                // Called when fullscreen content is dismissed.
+                Log.d("TAG", "The ad was dismissed.");
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                // Called when fullscreen content failed to show.
+                Log.d("TAG", "The ad failed to show.");
+            }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                // Called when fullscreen content is shown.
+                // Make sure to set your reference to null so you don't
+                // show it a second time.
+                mInterstitialAd = null;
+                Log.d("TAG", "The ad was shown.");
+            }
+        });
+    }
+    private void showAds(){
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(SoftBookHomeActivity.this);
+        } else {
+            Log.d("TAG", "The interstitial ad wasn't ready yet.");
+        }
     }
 
     @Override
     public void onBackPressed() {
-        UnityAds.removeListener(this);
         super.onBackPressed();
     }
 
     private void setupDetails(){
 
-        Glide.with(SoftBookHomeActivity.this).load(softCopyModel.getPicUrl()).error(R.drawable.book_placeholder).fallback(R.drawable.book_placeholder)
+        String picUrl;
+        if(softCopyModel.getCoverUri() != null){
+            picUrl = softCopyModel.getCoverUri().toString();
+        }else {
+            picUrl = softCopyModel.getPicUrl();
+        }
+        Glide.with(SoftBookHomeActivity.this).load(picUrl).error(R.drawable.book_placeholder).fallback(R.drawable.book_placeholder)
                 .apply(bitmapTransform(new BlurTransformation(60))).into(bookImageView);
 
         textView.setText(softCopyModel.getDescription());
     }
     private void navigateToBookView(){
 
+        routing.clearParams();
+        routing.appendParams("softCopyModel", softCopyModel);
+        routing.navigate(SoftBookViewActivity.class, false);
 
-        Intent intent = new Intent(SoftBookHomeActivity.this, SoftBookViewActivity.class);
-        intent.putExtra("softCopyModel",softCopyModel);
-        startActivity(intent);
-
-    }
-
-    private void setFullScreenAdListeners(){
-
-        if(!MainActivity.USER_DATA.isPrimeMember() && !MainActivity.DOWNLOAD_IN_PROGRESS) {
-
-            if(softCopyModel.isFree()){
-                if (UnityAds.isReady(getString(R.string.fullScreenBookView_unity).trim())) {
-                    UnityAds.show(SoftBookHomeActivity.this, getString(R.string.fullScreenBookView_unity).trim());
-                }
-            }
-
-        }
-
-
-    }
-
-    @Override
-    public void onUnityAdsReady(String s) {
-
-    }
-
-    @Override
-    public void onUnityAdsStart(String s) {
-
-    }
-
-    @Override
-    public void onUnityAdsFinish(String s, UnityAds.FinishState finishState) {
-        UnityAds.removeListener(this);
-    }
-
-    @Override
-    public void onUnityAdsError(UnityAds.UnityAdsError unityAdsError, String s) {
-        UnityAds.removeListener(this);
     }
 }

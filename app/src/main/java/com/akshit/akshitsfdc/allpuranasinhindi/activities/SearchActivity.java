@@ -25,7 +25,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends BaseActivity {
 
     private String key;
 
@@ -54,13 +54,15 @@ public class SearchActivity extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager;
 
     private RelativeLayout lazyProgress;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         progress = findViewById(R.id.progress);
         db = FirebaseFirestore.getInstance();
@@ -75,7 +77,7 @@ public class SearchActivity extends AppCompatActivity {
             onBackPressed();
         });
         fileUtils = new FileUtils(SearchActivity.this);
-
+        uiUtils.setSnakebarView(getSnakBarView(findViewById(R.id.snakebarLayout)));
         mLayoutManager = new LinearLayoutManager(SearchActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -96,13 +98,9 @@ public class SearchActivity extends AppCompatActivity {
 
         paginationScroll();
 
-        if(!fileUtils.isNetworkConnected()){
+        if(!internetConnected){
             fileUtils.showLongToast("You are not connected to the internet.");
             findViewById(R.id.internetLostView).setVisibility(View.VISIBLE);
-            return;
-        }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
             return;
         }
 
@@ -112,6 +110,7 @@ public class SearchActivity extends AppCompatActivity {
 
         query = db.collection("digital_books")
                 .whereArrayContains("searchKeywords", key==null?"":key)
+
                 .whereEqualTo("isOneOfThePart", false)
                 .orderBy("priority").limit(listLimit);
 
@@ -212,7 +211,7 @@ public class SearchActivity extends AppCompatActivity {
         if(softCopyModels.size() <= 0){
             emptyView.setVisibility(View.VISIBLE);
         }
-        adapter = new SearchSoftBooksRecyclerViewAdapter(SearchActivity.this, softCopyModels);
+        adapter = new SearchSoftBooksRecyclerViewAdapter(this, softCopyModels);
 
         recyclerView.setAdapter(adapter);
     }

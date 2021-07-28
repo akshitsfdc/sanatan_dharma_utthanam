@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,27 +32,30 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
-import com.unity3d.ads.IUnityAdsListener;
-import com.unity3d.ads.UnityAds;
-
 import org.json.JSONObject;
-
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-public class SoftBookPurchaseActivity extends MainActivity implements PaymentResultListener, IUnityAdsListener {
+public class SoftBookPurchaseActivity extends MainActivity implements PaymentResultListener {
 
+    private final String TAG = "SoftBookPurchased";
     private FileUtils fileUtils;
     private SoftCopyModel softCopyModel;
     private ImageView bookImage;
@@ -61,6 +65,9 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
     private Button buyButton;
     private ProgressBar progress;
     private ProgressBar progressOuter;
+
+    private RewardedAd mRewardedAd;
+    private Button videoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +81,7 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         fileUtils = new FileUtils(SoftBookPurchaseActivity.this);
-
+        uiUtils.setSnakebarView(getSnakBarView(findViewById(R.id.snakebarLayout)));
 
         bookImage = findViewById(R.id.bookImage);
         title = findViewById(R.id.title);
@@ -83,9 +90,9 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         buyButton = findViewById(R.id.buyButton);
         progress = findViewById(R.id.progress);
         progressOuter = findViewById(R.id.progressOuter);
+        videoButton = findViewById(R.id.videoButton);
 
-        Intent intent=getIntent();
-        softCopyModel =(SoftCopyModel) intent.getSerializableExtra("softCopyModel");
+        softCopyModel =(SoftCopyModel) routing.getParam("softCopyModel");
 
         if(softCopyModel != null){
             setView(softCopyModel);
@@ -94,7 +101,7 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         }
         //Razor pay
         Checkout.preload(getApplicationContext());
-        getAppInfo();
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -134,18 +141,12 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
 
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
 
-        Button videoButton = findViewById(R.id.videoButton);
-        if(softCopyModel.isVideoOption()){
-            videoButton.setVisibility(View.VISIBLE);
-            videoButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    watchVideoToGetAccess();
-                }
-            });
-        }else{
-            videoButton.setVisibility(View.GONE);
+
+
+        if(softCopyModel.isVideoOption()) {
+            initRewardedAd();
         }
+
         findViewById(R.id.primeButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -154,12 +155,79 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         });
 
 
-        UnityAds.addListener(this);
+        if(!fireAuthService.isUserLoggedIn()){
+            uiUtils.showShortErrorSnakeBar("You must be logged in to access prime book");
+        }
+
+
     }
+
+    private void setButtons(boolean loadSuccess){
+
+        if(loadSuccess){
+
+            videoButton.setVisibility(View.VISIBLE);
+            videoButton.setOnClickListener(v -> watchVideoToGetAccess());
+        }
+
+    }
+    private void initRewardedAd(){
+
+        showPB(true);
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        RewardedAd.load(this, SplashActivity.APP_INFO.getBookAccessAdId().trim(),
+                adRequest, new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error.
+                        Log.d("SoftBookPurchased", loadAdError.getMessage());
+                        mRewardedAd = null;
+                        hidePB(true);
+                    }
+
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        mRewardedAd = rewardedAd;
+                        adContentCallbacks();
+                        setButtons(true);
+                        Log.d("SoftBookPurchased", "Ad was loaded.");
+                        hidePB(true);
+                    }
+                });
+
+    }
+    private void adContentCallbacks(){
+
+        mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+            @Override
+            public void onAdShowedFullScreenContent() {
+                // Called when ad is shown.
+                Log.d(TAG, "Ad was shown.");
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                // Called when ad fails to show.
+                Log.d(TAG, "Ad failed to show.");
+                uiUtils.showShortErrorSnakeBar("Unable to show you ad at this time");
+                videoButton.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                // Called when ad is dismissed.
+                // Set the ad reference to null so you don't show the ad a second time.
+                Log.d(TAG, "Ad was dismissed.");
+                videoButton.setVisibility(View.GONE);
+                mRewardedAd = null;
+            }
+        });
+    }
+
 
     @Override
     public void onBackPressed() {
-        UnityAds.removeListener(this);
         super.onBackPressed();
     }
 
@@ -169,59 +237,33 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         startActivity(intent);
         //finish();
     }
+
     private void watchVideoToGetAccess(){
 
-        if (UnityAds.isReady (getString(R.string.bookAccessRewardedVideo_unity).trim())) {
-            UnityAds.show ( SoftBookPurchaseActivity.this,getString(R.string.bookAccessRewardedVideo_unity));
-        }else{
-            fileUtils.showShortToast("Video is being prepared, please wait few seconds");
+        if (mRewardedAd != null) {
+
+            Activity activityContext = SoftBookPurchaseActivity.this;
+
+            mRewardedAd.show(activityContext, new OnUserEarnedRewardListener() {
+                @Override
+                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                    // Handle the reward.
+                    Log.d(TAG, "The user earned the reward.");
+                    navigateToBookView();
+
+                }
+            });
+        } else {
+            Log.d(TAG, "The rewarded ad wasn't ready yet.");
         }
 
     }
     private void navigateToBookView(){
-        Intent intent = new Intent(SoftBookPurchaseActivity.this, SoftBookHomeActivity.class);
-        intent.putExtra("softCopyModel",softCopyModel);
-        startActivity(intent);
+        routing.clearParams();
+        routing.appendParams("softCopyModel", softCopyModel);
+        routing.navigate(SoftBookHomeActivity.class, false);
     }
-    private void getAppInfo(){
 
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        if(!fileUtils.isNetworkConnected()){
-            fileUtils.showLongToast("You are not connected to the internet.");
-            return;
-        }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
-            return;
-        }
-        showPB(true);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("app_info").document("meta_data").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
-                    DocumentSnapshot documentSnapshot = task.getResult();
-
-                    if(documentSnapshot.exists()){
-
-                        SplashActivity.APP_INFO = (AppInfo) documentSnapshot.toObject(AppInfo.class);
-
-                        hidePB(true);
-
-                    }else {
-                        fileUtils.showLongToast("Could not connect to the server please try again later.");
-                        hidePB(true);
-                    }
-                }else{
-                    fileUtils.showLongToast("Could not connect to the server please try again later.");
-                    hidePB(true);
-                }
-            }
-        });
-
-    }
     private void setView(SoftCopyModel softCopyModel){
 
         DecimalFormat df = new DecimalFormat("#");
@@ -249,11 +291,14 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         priceText = "Buy This Permanently ("+getString(R.string.rs)+""+df.format(softCopyModel.getPrice())+")";
         buyButton.setText(priceText);
 
-        buyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+
+        buyButton.setOnClickListener(v -> {
+            if(fireAuthService.getCurrentUser() == null){
+                routing.navigate(LoginActivity.class, false);
+            }else {
                 startPayment(softCopyModel);
             }
+
         });
     }
 
@@ -261,12 +306,12 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(!fileUtils.isNetworkConnected()){
-            fileUtils.showLongToast("You are not connected to the internet.");
+        if(!internetConnected){
+            uiUtils.showShortErrorSnakeBar("You are not connected to the internet.");
             return;
         }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
+        if(!fireAuthService.isUserLoggedIn()){
+            uiUtils.showShortErrorSnakeBar("You are not logged in, please log in again..");
             return;
         }
         /*
@@ -280,14 +325,12 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
         try {
             int total = Math.round(softCopyModel.getPrice());
 
-            if (BuildConfig.DEBUG) {
-                co.setKeyID(SplashActivity.APP_INFO.getPaymentApiSandbox());
-            }else {
-                co.setKeyID(SplashActivity.APP_INFO.getPaymentApiProduction());
-            }
+
+            co.setKeyID(SplashActivity.APP_INFO.getPaymentApiProduction());
+
 
             JSONObject options = new JSONObject();
-            options.put("key", SplashActivity.APP_INFO.getPaymentApiSandbox());
+            options.put("key", SplashActivity.APP_INFO.getPaymentApiProduction());
             options.put("name", getString(R.string.app_name));
             String descriptionValue = "Book Purchase - "+softCopyModel.getName();
             options.put("description", descriptionValue);
@@ -297,7 +340,10 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
             options.put("amount", String.valueOf(total*100));
 
             JSONObject preFill = new JSONObject();
-            preFill.put("email", currentUser.getEmail());
+            if(currentUser != null){
+                preFill.put("email", currentUser.getEmail());
+                preFill.put("contact", currentUser.getPhoneNumber());
+            }
             //preFill.put("contact", "9876543210");
 
             options.put("prefill", preFill);
@@ -349,67 +395,30 @@ public class SoftBookPurchaseActivity extends MainActivity implements PaymentRes
 
     private void saveUserData(){
 
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(!fileUtils.isNetworkConnected()){
-            fileUtils.showLongToast("You are not connected to the internet.");
-            return;
-        }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
-            return;
-        }
         showPB(true);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final DocumentReference docRef = db.collection("user_data").document(currentUser.getUid());
-
-         MainActivity.USER_DATA.getPurchasedBooks().add(softCopyModel);
-
-        docRef.set(MainActivity.USER_DATA).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                fileUtils.showShortToast("Book purchase success.");
-                navigateToOrderCompleted(true);
-                hidePB(true);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                fileUtils.showShortToast("Error in saving purchased book user data.");
-                hidePB(true);
-            }
-        });
-    }
-
-    @Override
-    public void onUnityAdsReady(String s) {
-
-    }
-
-    @Override
-    public void onUnityAdsStart(String s) {
-
-    }
-
-    @Override
-    public void onUnityAdsFinish(String s, UnityAds.FinishState finishState) {
-        if (finishState == UnityAds.FinishState.COMPLETED) {
-            UnityAds.removeListener(this);
-            navigateToBookView();
-        } else if (finishState == UnityAds.FinishState.SKIPPED) {
-            //fileUtils.showShortToast("You must not skip the video to avail the read access");
-        } else if (finishState == UnityAds.FinishState.ERROR) {
-            fileUtils.showShortToast("Currently no video ad available, please try again later!");
-        }
-    }
-
-    @Override
-    public void onUnityAdsError(UnityAds.UnityAdsError unityAdsError, String s) {
-        UnityAds.removeListener(this);
-        if (this instanceof SoftBookPurchaseActivity) {
-            fileUtils.showShortToast("Currently no video ad available, please try again later!");
+        List<SoftCopyModel> purchasedBooks;
+        if( SplashActivity.USER_DATA.getPurchasedBooks() == null){
+            purchasedBooks = new ArrayList<>();
+            purchasedBooks.add(softCopyModel);
+        }else {
+            purchasedBooks = SplashActivity.USER_DATA.getPurchasedBooks();
+            purchasedBooks.add(softCopyModel);
         }
 
+        Map<String, Object> map = new HashMap<>();
+        map.put("purchasedBooks",purchasedBooks);
+
+        fireStoreService.updateData("user_data", fireAuthService.getUserId(), map)
+                .addOnSuccessListener(aVoid -> {
+                    navigateToOrderCompleted(true);
+                    hidePB(true);
+                })
+                .addOnFailureListener(e -> {
+                    fileUtils.showShortToast("Error in saving purchased book user data.");
+                    hidePB(true);
+                });
     }
+
 }

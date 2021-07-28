@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/book_placeholder"
                 android:layout_centerHorizontal="true"
-                android:scaleType="fitXY" />
+                android:scaleType="centerCrop" />
         </androidx.cardview.widget.CardView>
 
         <ProgressBar
@@ -51,11 +51,12 @@
         android:layout_toEndOf="@+id/bookImageOuter"
         >
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
             android:layout_marginStart="25dp"
+
             >
 
             <TextView
@@ -63,50 +64,95 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/roboto_bold"
                 android:text="Book Name"
-                android:textSize="14sp" />
+                android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/language"
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/title"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:text="Language" />
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                >
 
-            <TextView
-                android:id="@+id/price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/title"
-                android:layout_toEndOf="@+id/language"
-                android:layout_marginBottom="5dp"
-                android:textSize="10sp"
-                android:layout_marginStart="10dp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:text="Free" />
-
-
-
-                <Button
-                    android:id="@+id/favoriteButton"
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="25dp"
-                    android:layout_marginTop="15dp"
-                   android:layout_below="@+id/price"
-                    android:background="@drawable/bordered_button_blue"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="+ Favorite"
-                    android:textAllCaps="false"
-                    android:textColor="@color/color_leaderboard_blue"
-                    android:textSize="12sp" />
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/roboto"
+                    android:text="Pages : " />
 
-            </RelativeLayout>
+                <TextView
+                    android:id="@+id/pagesValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="@font/roboto_medium"
+                    android:text="101" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                >
+
+                <TextView
+                    android:id="@+id/language"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/roboto"
+                    android:text="Language" />
+
+                <TextView
+                    android:id="@+id/price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="@font/roboto"
+                    android:text="Free" />
+
+            </LinearLayout>
 
 
+
+
+
+<!--                <Button-->
+<!--                    android:id="@+id/favoriteButton"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="25dp"-->
+<!--                    android:layout_marginTop="15dp"-->
+<!--                   android:layout_below="@+id/price"-->
+<!--                    android:background="@drawable/bordered_button_blue"-->
+<!--                    android:fontFamily="sans-serif-medium"-->
+<!--                    android:text="+ Favorite"-->
+<!--                    android:textAllCaps="false"-->
+<!--                    android:textColor="@color/color_leaderboard_blue"-->
+<!--                    android:textSize="12sp" />-->
+
+
+
+            </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_alignParentBottom="true"
+            android:fontFamily="@font/roboto_medium"
+            android:text="+ Favorite"
+            android:textAllCaps="false"
+            android:textColor="@color/color_leaderboard_blue"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/primary"
+            android:textSize="12sp" />
     </RelativeLayout>
 </RelativeLayout>

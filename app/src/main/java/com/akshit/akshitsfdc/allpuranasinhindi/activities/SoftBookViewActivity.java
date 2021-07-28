@@ -1,29 +1,23 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.PersistableBundle;
 import android.os.StatFs;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,33 +25,20 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
-import com.akshit.akshitsfdc.allpuranasinhindi.models.BookDisplaySliderModel;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.CurrentDownloadingModel;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
+import com.akshit.akshitsfdc.allpuranasinhindi.service.SQLService;
 import com.akshit.akshitsfdc.allpuranasinhindi.utils.FileUtils;
-
 import com.bumptech.glide.Glide;
 import com.github.barteksc.pdfviewer.PDFView;
-import com.github.barteksc.pdfviewer.listener.OnErrorListener;
-import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
-import com.github.barteksc.pdfviewer.listener.OnLongPressListener;
-import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
-import com.github.barteksc.pdfviewer.listener.OnRenderListener;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.Gson;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Timer;
 
@@ -65,20 +46,17 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class SoftBookViewActivity extends AppCompatActivity {
+public class SoftBookViewActivity extends BaseActivity {
 
     private FileUtils fileUtils;
     private static final int  MEGABYTE = 1024 * 1024;
     public static String fileName;
     private File generatedFile;
     private String urlLink;
-    private Uri uri;
     private File folder;
     private SoftCopyModel softCopyModel;
     private PDFView pdfView;
     private ProgressBar determinateBar;
-    private SharedPreferences sharedPref;
-    private SharedPreferences.Editor editor;
     private RelativeLayout loadingLayout;
     private TextView pageCountText;
     private int currentPageIndex;
@@ -92,15 +70,17 @@ public class SoftBookViewActivity extends AppCompatActivity {
     private ImageView progressBookImage;
     private TextView percentText;
     private Timer timer;
-    private int recentLimit = 11;
     private RelativeLayout internetLostView;
+    private Uri offlineBookUri, offlineCoverUri;
+    private SQLService sqlService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_soft_book_view);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -123,6 +103,10 @@ public class SoftBookViewActivity extends AppCompatActivity {
             }
         });
 
+        uiUtils.setSnakebarView(getSnakBarView(findViewById(R.id.snakebarLayout)));
+
+        sqlService = new SQLService(this);
+
         fileUtils = new FileUtils(SoftBookViewActivity.this);
         loadingLayout = findViewById(R.id.loadingLayout);
         determinateBar = findViewById(R.id.determinateBar);
@@ -141,21 +125,22 @@ public class SoftBookViewActivity extends AppCompatActivity {
         readModeLayout = findViewById(R.id.readModeLayout);
         internetLostView = findViewById(R.id.internetLostView);
 
-        Intent intent=getIntent();
-        softCopyModel =(SoftCopyModel) intent.getSerializableExtra("softCopyModel");
-
-
+        softCopyModel = (SoftCopyModel)routing.getParam("softCopyModel");
 
 
         if(MainActivity.DOWNLOAD_IN_PROGRESS){
 
             bookDownloading();
+            pdfView.setOnClickListener(v->{
+                if(headerView.getVisibility() == View.VISIBLE){
+                    headerView.setVisibility(View.GONE);
+                }else {
+                    headerView.setVisibility(View.VISIBLE);
+                }
+
+            });
         }else {
 
-
-            sharedPref = getSharedPreferences(
-                    "pageIndexes", Context.MODE_PRIVATE);
-            currentPageIndex = getPageIndex();
             setView();
 
             pdfView.setOnClickListener(v->{
@@ -204,7 +189,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
         }
         long availableMemory = getAvailableMemory();
         if(availableMemory < 100){
-            showAlertSnackbar("Your device is running low memory please delete some books from offline or clean up your device", true);
+            uiUtils.showLongErrorSnakeBar("Your device is running low memory please delete some books from offline or clean up your device");
         }
 
     }
@@ -213,7 +198,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
         hideSoftKeyboard(currentNumberEditText);
         if(TextUtils.isEmpty(numberText)){
-            fileUtils.showShortToast("Not a valid page number.");
+            uiUtils.showShortErrorSnakeBar("Not a valid page number.");
             return;
         }
         int number = Integer.parseInt(numberText);
@@ -254,6 +239,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
             }
             return true;
         });
+
         nightMode.setOnMenuItemClickListener(v->{
 
             if(readModeLayout.getVisibility() == View.VISIBLE){
@@ -284,89 +270,70 @@ public class SoftBookViewActivity extends AppCompatActivity {
         percentText.setText(s);
     }
 
-    private int getPageIndex(){
-        return sharedPref.getInt(softCopyModel.getBookId(), 0);
-    }
 
+    private void beforePdfLoad(){
+
+        pageCountText.setVisibility(View.VISIBLE);
+
+        determinateBar.setVisibility(View.GONE);
+        loadingLayout.setVisibility(View.GONE);
+
+        pdfView.enableRenderDuringScale(true);
+        pdfView.recycle();
+        pdfView.useBestQuality(true);
+
+    }
+    private void changePageNumberText(int page , int pageCount){
+        currentPageIndex = page;
+        String text = currentPageIndex+1+"/"+pageCount;
+        pageCountText.setText(text);
+        currentNumberEditText.setText(String.valueOf(page+1));
+    }
     private void setView(){
 
-        String bookName = softCopyModel.getFileName();
 
-        fileName = bookName+".pdf";
-
-        urlLink = softCopyModel.getDownloadUrl();//getArguments().getString("url");
-
-        folder = fileUtils.getFolder("puran_collection");
-
-        final File file = new File(folder, fileName);
-
-        //setTitle(title);
-
-        try{
-
-            if(file.exists()){
-                pageCountText.setVisibility(View.VISIBLE);
-
-                determinateBar.setVisibility(View.GONE);
-                loadingLayout.setVisibility(View.GONE);
-
-                pdfView.enableRenderDuringScale(true);
-                pdfView.recycle();
-                pdfView.useBestQuality(true);
-
-                uri = fileUtils.getUri("com.akshit.akshitsfdc.allpuranasinhindi.provider", file);
-
-                checkOfflineMode();
-
-                pdfView.fromUri(uri).defaultPage(currentPageIndex)
-                        .onPageChange(new OnPageChangeListener() {
-                            @Override
-                            public void onPageChanged(int page, int pageCount) {
-                                currentPageIndex = page;
-                                String text = currentPageIndex+1+"/"+pageCount;
-                                pageCountText.setText(text);
-                                currentNumberEditText.setText(String.valueOf(page+1));
-                            }
-                        }).onRender(new OnRenderListener() {
-                            @Override
-                            public void onInitiallyRendered(int nbPages) {
-                                totalPages = pdfView.getPageCount();
-                                totalNumberEditText.setText(String.valueOf(pdfView.getPageCount()));
-                                setupContinueReadingList();
-                            }
-                }).onLongPress(new OnLongPressListener() {
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        fileUtils.showLongToast("You are reading "+softCopyModel.getName());
-                    }
-                }).enableSwipe(true).onError(new OnErrorListener(){
-                    @Override public void onError(Throwable t) {
-
-                        file.getAbsoluteFile().delete();
-                        showAlertSnackbar("Load error please try again..", false);
-                    } }).onLoad(new OnLoadCompleteListener() {
-                    @Override public void loadComplete(int nbPages) {  } }).enableAnnotationRendering(true).load();
+        SoftCopyModel offlineCopy = sqlService.getOfflineBookById(softCopyModel.getBookId());
 
 
-            }else{
-                if(fileUtils.isNetworkConnected()){
+        if(offlineCopy == null){
+            firstTimeBook();
+        }else {
+            if(offlineCopy.getBookUri() == null){
+                firstTimeBook();
+            }else {
+
+                currentPageIndex = offlineCopy.getReadingPage();
+                beforePdfLoad();
+                pdfView.fromUri(offlineCopy.getBookUri())
+                        .defaultPage(offlineCopy.getReadingPage())
+                        .onPageChange((page, pageCount) -> {
+                            changePageNumberText(page, pageCount);
+                            sqlService.updateOfflineBookReadingNumber(offlineCopy.getBookId(), page);
+                        })
+                        .onRender(nbPages -> {
+                            totalPages = pdfView.getPageCount();
+                            totalNumberEditText.setText(String.valueOf(pdfView.getPageCount()));
+                        })
+                        .onLongPress(e -> uiUtils.showShortSuccessSnakeBar("You are reading "+offlineCopy.getName()))
+                        .enableSwipe(true)
+                        .onError(t -> uiUtils.showShortErrorSnakeBar("Load error please try again.."))
+                        .enableAnnotationRendering(true)
+                        .load();
+
+            }
+        }
+    }
+
+    private void firstTimeBook(){
+        if(fileUtils.isNetworkConnected()){
                     download();
                     startTimer();
                 }else{
                     offlineMode();
                 }
-            }
-
-        }catch (Exception e){
-            fileUtils.showLongToast("Something Went wrong!");
-            e.printStackTrace();
-
-        }
     }
-
     @Override
     public void onBackPressed() {
-        savePageIndex();
         if(timer != null){
             try{
                 timer.cancel();
@@ -378,24 +345,13 @@ public class SoftBookViewActivity extends AppCompatActivity {
         }
         super.onBackPressed();
     }
-
-    private void savePageIndex(){
-
-        if(sharedPref != null){
-            editor = sharedPref.edit();
-            editor.remove(fileName);
-            editor.apply();
-            editor.putInt(softCopyModel.getBookId(), currentPageIndex);
-            editor.apply();
-        }
-    }
     private void offlineMode(){
         determinateBar.setVisibility(View.GONE);
         loadingLayout.setVisibility(View.GONE);
         MainActivity.DOWNLOAD_IN_PROGRESS = false;
         MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
         internetLostView.setVisibility(View.VISIBLE);
-        fileUtils.showLongToast("You might got disconnected please try again.");
+        uiUtils.showShortSnakeBar("You might got disconnected please try again.");
     }
     private void startTimer(){
 
@@ -408,14 +364,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-
-                        //determinateBar.setProgress(MainActivity.CURRENT_DOWNLOAD_PROGRESS);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mainThreadCode(MainActivity.CURRENT_DOWNLOAD_PROGRESS);
-                            }
-                        });
+                        runOnUiThread(() -> mainThreadCode(MainActivity.CURRENT_DOWNLOAD_PROGRESS));
 
                         if (!MainActivity.DOWNLOAD_IN_PROGRESS) {
                             timer.cancel();
@@ -492,7 +441,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
                 MainActivity.DOWNLOAD_IN_PROGRESS = false;
                 MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
 
-                fileUtils.showLongToast("You are not connected to the internet!");
+                uiUtils.showLongErrorSnakeBar("You are not connected to the internet!");
                 return;
             }
 
@@ -512,10 +461,9 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
             generatedFile = directory;
 
-            prepareOfflineMode();
+            offlineBookUri = fileUtils.getUri(directory);
 
-            MainActivity.DOWNLOAD_IN_PROGRESS = false;
-            MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
+
 
         } catch (Exception e){
             if(directory.exists()){
@@ -530,6 +478,15 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
         MainActivity.DOWNLOAD_IN_PROGRESS = true;
         MainActivity.CURRENT_DOWNLOADING_MODEL = new CurrentDownloadingModel(softCopyModel.getPicUrl(), softCopyModel.getName());
+
+        String bookName = softCopyModel.getFileName();
+
+        fileName = bookName+".pdf";
+
+        urlLink = softCopyModel.getDownloadUrl();//getArguments().getString("url");
+
+        folder = fileUtils.getFolder(getString(R.string.puran_collection_name));
+
 
         final File pdfFile = new File(folder, fileName);
 
@@ -554,11 +511,9 @@ public class SoftBookViewActivity extends AppCompatActivity {
                     downloadFile(urlLink, pdfFile);
                 } catch (Throwable t) {
                 }
-                handler.post(new Runnable() {
-                    public void run() {
-                        //setView();
-                        navigateToItself();
-                    }
+                handler.post(() -> {
+                    //setView();
+                   offlineWork();
                 });
             }
 
@@ -577,81 +532,63 @@ public class SoftBookViewActivity extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        savePageIndex();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        savePageIndex();
-    }
 
     @Override
     protected void onDestroy() {
-        savePageIndex();
         super.onDestroy();
+    }
+
+    private void offlineWork(){
+        runOnUiThread(() -> {
+            prepareOfflineMode();
+        });
     }
     private void prepareOfflineMode(){
 
-        if(!softCopyModel.isFree() || softCopyModel.getPrice() == -1){
-            if(!isPurchased(softCopyModel.getBookId())){
-                return;
-            }
-        }
-        ArrayList<String> softCopyModels;
-        if(softCopyModel.getBookParts() == null){
-            softCopyModels = new ArrayList<>();
-        }else {
-            softCopyModels = softCopyModel.getBookParts();
-        }
-
-        SoftCopyModel newSoftCopyModel = new SoftCopyModel(softCopyModel.getPicUrl(), softCopyModel.getName(), softCopyModel.getLanguage(), softCopyModel.isFree(),
-                softCopyModel.getPrice(), softCopyModel.getDownloadUrl(), softCopyModel.getDescription(), softCopyModel.getFileName(), softCopyModel.getPages()
-                ,softCopyModel.getBookId(), softCopyModel.isVideoOption(), softCopyModels, softCopyModel.isBooksInPart());
 
         try{
+
+            showLoading();
 
             final Bitmap[] bitmapForOffline = new Bitmap[1];
 
             Handler handler = new Handler();
 
-            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread th, Throwable ex) {
-                    if(generatedFile.exists()){
-                        generatedFile.getAbsoluteFile().delete();
-                    }
-                    MainActivity.DOWNLOAD_IN_PROGRESS = false;
-                    MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
+            Thread.UncaughtExceptionHandler h = (th, ex) -> {
 
+                if(generatedFile.exists()){
+                    generatedFile.getAbsoluteFile().delete();
                 }
+
+                MainActivity.DOWNLOAD_IN_PROGRESS = false;
+                MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
+
+                setBookOffline();
+                hideLoading();
             };
-            Thread background = new Thread(new Runnable() {
+            Thread background = new Thread(() -> {
+                try {
+                    bitmapForOffline[0] = getBitmapFromURL(softCopyModel.getPicUrl());
 
+                    offlineCoverUri = saveBookImageForOffline(softCopyModel.getFileName(), bitmapForOffline[0]);
 
-                // After call for background.start this run method call
-                public void run() {
-                    try {
-                       // Bitmap bitmapForOffline = bitmapForOffline;
-                        bitmapForOffline[0] = getBitmapFromURL(softCopyModel.getPicUrl());
-                    } catch (Throwable t) {
-                    }
-                    handler.post(new Runnable() {
-                        public void run() {
-                            newSoftCopyModel.setPicUrl(saveBookImageForOffline(softCopyModel.getBookId(), bitmapForOffline[0]).toString());
-                            saveData(newSoftCopyModel);
-                        }
-                    });
+                } catch (Throwable t) {
+                    setBookOffline();
                 }
+                handler.post(() -> {
+                    setBookOffline();
+                    hideLoading();
+                });
             });
             background.setUncaughtExceptionHandler(h);
             // Start Thread
             background.start();
 
         }catch (Exception e){
+            setBookOffline();
             e.printStackTrace();
+        }finally {
+            hideLoading();
         }
     }
     public static Bitmap getBitmapFromURL(String src) {
@@ -669,6 +606,18 @@ public class SoftBookViewActivity extends AppCompatActivity {
         }
     }
 
+    private void setBookOffline(){
+
+        if(offlineBookUri != null ){
+
+            long result = sqlService.insertOfflineBook(softCopyModel,
+                    (offlineCoverUri == null?null:offlineCoverUri.toString()), offlineBookUri.toString());
+        }
+        navigateToItself();
+        MainActivity.DOWNLOAD_IN_PROGRESS = false;
+        MainActivity.CURRENT_DOWNLOAD_PROGRESS = 0;
+
+    }
     private Uri saveBookImageForOffline(String fileName, Bitmap bitmap){
 
         String mImageName = "image_"+fileName+".jpg";
@@ -679,7 +628,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
         if (file.exists ()) {
             try{
-                file.getAbsoluteFile().delete();
+                fileUtils.getUri(file);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -691,7 +640,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
             stream = new FileOutputStream(file);
 
-            bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100, stream);
 
             stream.flush();
 
@@ -702,41 +651,13 @@ public class SoftBookViewActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         if(file.exists()) {
-            return fileUtils.getUri("com.akshit.akshitsfdc.allpuranasinhindi.provider", file);
+            return fileUtils.getUri(file);
         }
 
         return null;
     }
-    private void saveData(SoftCopyModel offlineBook) {
 
-        ArrayList<SoftCopyModel> offlineBookList = loadOfflineBooks();
 
-        offlineBookList.add(offlineBook);
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(offlineBookList);
-        editor.putString("offlineBookList", json);
-        editor.apply();
-    }
-
-    private ArrayList<SoftCopyModel> loadOfflineBooks() {
-
-        ArrayList<SoftCopyModel> offlineBookList;
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("offlineBookList", null);
-        Type type = new TypeToken<ArrayList<SoftCopyModel>>() {}.getType();
-        offlineBookList = gson.fromJson(json, type);
-
-        if (offlineBookList == null) {
-            offlineBookList = new ArrayList<>();
-        }
-
-        return offlineBookList;
-    }
 
     public final long getAvailableMemory(){
         long free_memory = 0;
@@ -752,127 +673,7 @@ public class SoftBookViewActivity extends AppCompatActivity {
 
     }
 
-    private void showAlertSnackbar(String msg, boolean isLong) {
 
-        View view = findViewById(R.id.parent);
-        Snackbar snackbar;
 
-        if(isLong){
-            snackbar = Snackbar.make(view, msg,
-                    Snackbar.LENGTH_LONG);
-            snackbar.setDuration(7000);
-        }else {
-            snackbar = Snackbar.make(view, msg,
-                    Snackbar.LENGTH_SHORT);
-        }
 
-        snackbar.show();
-    }
-
-    private void checkOfflineMode(){
-
-        ArrayList<SoftCopyModel> offlineBookList = loadOfflineBooks();
-        SoftCopyModel searchBook = null;
-        for(SoftCopyModel softCopy : offlineBookList){
-            if(TextUtils.equals(softCopy.getBookId(), softCopyModel.getBookId())){
-                searchBook = softCopy;
-                break;
-            }
-        }
-
-        if(searchBook == null){
-            //if(fileUtils.isNetworkConnected()){
-                prepareOfflineMode();
-            //}
-        }
-    }
-
-    private void setupContinueReadingList(){
-
-        if(!softCopyModel.isFree()){
-            if(!isPurchased(softCopyModel.getBookId())){
-                return;
-            }
-        }
-
-        ArrayList<BookDisplaySliderModel> bookDisplaySliderModels = loadContinueReadingList();
-
-        int bookIndex = bookDisplaySliderModelIndex(bookDisplaySliderModels, softCopyModel.getBookId());
-        if( bookIndex != -1){
-            if(bookIndex != 0 ){
-                BookDisplaySliderModel bookDisplaySliderModel = bookDisplaySliderModels.get(bookIndex);
-                bookDisplaySliderModels.remove(bookIndex);
-                bookDisplaySliderModels.add(0, bookDisplaySliderModel);
-            }
-        }else {
-            BookDisplaySliderModel bookDisplaySliderModel = new BookDisplaySliderModel();
-            bookDisplaySliderModel.setType(getString(R.string.offline_key));
-            bookDisplaySliderModel.setBookId(softCopyModel.getBookId());
-            bookDisplaySliderModel.setName(softCopyModel.getName());
-            bookDisplaySliderModel.setPicUrl(softCopyModel.getPicUrl());
-            bookDisplaySliderModel.setDownloadUrl(softCopyModel.getDownloadUrl());
-            bookDisplaySliderModel.setFileName(softCopyModel.getFileName());
-
-            if((bookDisplaySliderModels.size()) == recentLimit){
-                bookDisplaySliderModels.remove(bookDisplaySliderModels.size() - 1);
-            }
-
-            if(bookDisplaySliderModels.size() > 0){
-                bookDisplaySliderModels.add(0, bookDisplaySliderModel);
-            }else {
-                bookDisplaySliderModels.add(bookDisplaySliderModel);
-            }
-
-        }
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(bookDisplaySliderModels);
-        editor.putString("bookDisplaySliderModels", json);
-        editor.apply();
-
-        SplashActivity.DISPLAY_UPDATE_NOTIFIER = true;
-    }
-    private ArrayList<BookDisplaySliderModel> loadContinueReadingList(){
-
-        ArrayList<BookDisplaySliderModel> bookDisplaySliderModels;
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("bookDisplaySliderModels", null);
-        Type type = new TypeToken<ArrayList<BookDisplaySliderModel>>() {}.getType();
-        bookDisplaySliderModels = gson.fromJson(json, type);
-
-        if (bookDisplaySliderModels == null) {
-            bookDisplaySliderModels = new ArrayList<>();
-        }
-        return bookDisplaySliderModels;
-    }
-
-    private int bookDisplaySliderModelIndex(ArrayList<BookDisplaySliderModel> bookDisplaySliderModels, String bookId){
-
-        for (int i = 0; i < bookDisplaySliderModels.size(); ++i){
-            if(TextUtils.equals(bookId, bookDisplaySliderModels.get(i).getBookId())){
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private boolean isPurchased(String bookId){
-
-        boolean purchased = false;
-        ArrayList<SoftCopyModel> softCopyModels = MainActivity.USER_DATA.getPurchasedBooks();
-
-        for (SoftCopyModel softCopyModel : softCopyModels){
-            if(TextUtils.equals(softCopyModel.getBookId(), bookId)){
-                purchased = true;
-                break;
-            }
-        }
-
-        return purchased;
-    }
 }

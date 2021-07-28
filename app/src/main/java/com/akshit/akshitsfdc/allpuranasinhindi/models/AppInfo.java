@@ -1,6 +1,7 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AppInfo {
 
@@ -15,10 +16,15 @@ public class AppInfo {
     private String paymentApiProduction;
     private String paymentApiSandbox;
     private ArrayList<SliderModel> bannerUrls;
+    private List<DisplayModel> displayModels;
     private int primePrice;
     private ArrayList<BookDisplayCollectionModel> bookDisplayCollection;
-
     private boolean saveSearchAnalytics;
+    private String homeBannerId;
+    private String bookAccessAdId;
+    private String downloadingGapAdId;
+    private boolean allowPrime;
+    private boolean showIndividualPrice;
 
     public AppInfo() {
     }
@@ -134,5 +140,53 @@ public class AppInfo {
 
     public void setBookDisplayCollection(ArrayList<BookDisplayCollectionModel> bookDisplayCollection) {
         this.bookDisplayCollection = bookDisplayCollection;
+    }
+
+    public String getHomeBannerId() {
+        return homeBannerId;
+    }
+
+    public void setHomeBannerId(String homeBannerId) {
+        this.homeBannerId = homeBannerId;
+    }
+
+    public String getBookAccessAdId() {
+        return bookAccessAdId;
+    }
+
+    public void setBookAccessAdId(String bookAccessAdId) {
+        this.bookAccessAdId = bookAccessAdId;
+    }
+
+    public String getDownloadingGapAdId() {
+        return downloadingGapAdId;
+    }
+
+    public void setDownloadingGapAdId(String downloadingGapAdId) {
+        this.downloadingGapAdId = downloadingGapAdId;
+    }
+
+    public boolean isAllowPrime() {
+        return allowPrime;
+    }
+
+    public void setAllowPrime(boolean allowPrime) {
+        this.allowPrime = allowPrime;
+    }
+
+    public boolean isShowIndividualPrice() {
+        return showIndividualPrice;
+    }
+
+    public void setShowIndividualPrice(boolean showIndividualPrice) {
+        this.showIndividualPrice = showIndividualPrice;
+    }
+
+    public List<DisplayModel> getDisplayModels() {
+        return displayModels;
+    }
+
+    public void setDisplayModels(List<DisplayModel> displayModels) {
+        this.displayModels = displayModels;
     }
 }

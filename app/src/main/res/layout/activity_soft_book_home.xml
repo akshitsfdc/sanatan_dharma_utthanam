@@ -99,4 +99,16 @@
         android:elevation="10dp"
         android:textStyle="normal|bold"
         />
+    <ProgressBar
+        android:id="@+id/progressOuter"
+        android:visibility="gone"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:elevation="10dp"
+        android:theme="@style/ProgressBarTheme"
+        />
 </RelativeLayout>

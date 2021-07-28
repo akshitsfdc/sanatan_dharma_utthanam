@@ -10,28 +10,12 @@
     <string name="menu_hd_books">HD Books</string>
     <string name="menu_festive">Festive Books</string>
     <string name="menu_others">More Books</string>
-    <string name="menu_buy">Buy Hard Copy</string>
-    <string name="menu_orders">My Orders</string>
     <string name="menu_contact">Contact Us</string>
     <string name="menu_updesh">Thoughts Exchange</string>
-
-    <string name="skip_txt_link"><u>Skip For Now</u></string>
 
     <string name="menu_share">Invite Friends</string>
 
     <string name="getPDFButton">Read Complete Book</string>
-
-    <string name="msg_subscribed">Subscribed to weather topic</string>
-
-    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
-    <string name="default_notification_channel_name" translatable="true">Weather</string>
-
-    <string name="fcm_message">FCM Message</string>
-
-    <string name="forgotpwd">Forgot Password?</string>
-
-    <string name="signupNewUser"><u>SIGN UP NOW</u></string>
-    <string name="separaterLine">OR</string>
 
     <string name="rs">\u20B9</string>
 
@@ -43,22 +27,64 @@
 
     <string name="prime_intro1">सभी विज्ञापन Prime सदस्यों के लिए हटा दिए जाएंगे। आपका ऐप जीवनकाल के लिए पूरी तरह से <b>विज्ञापन मुक्त</b> हो जाएगा</string>
     <string name="prime_intro2">सभी सशुल्क <b>पुस्तकें</b> और भविष्य की पुस्तकें जो इस ऐप में जोड़ी जाएंगी, Prime सदस्यों के लिए <b>नि:शुल्क</b> बन जाएंगी। यह जीवनकाल के लिए प्रभावी होगा</string>
+
+
+    <string name="prime_intro1_en">All ads will be removed for Prime members. Your app will be completely <b>ad free</b> for lifetime</string>
+    <string name="prime_intro2_en">All paid <b>Books</b> and future books that will be added to this app will become <b>Free</b> for Prime members. It will be effective for lifetime</string>
     <string name="prime_intro3">All books free | No ads forever</string>
 
     <!-- TODO: Remove or change this placeholder text -->
 
-    <string name="unity_ads_game_id">3531397</string>
-
-    <string name="fullScreenBookView_unity">fullScreenBookView</string>
-    <string name="bookAccessRewardedVideo_unity">bookAccessRewardedVideo</string>
-    <string name="homeBanner_unity">homeBanner</string>
-
     <string name="go_to">Go to page</string>
     <string name="night_mode_on">Turn on reading mode</string>
     <string name="night_mode_off">Turn off reading mode</string>
-
-    <string name="offline_key">offline</string>
-    <string name="hard_key">hard</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="login_with_email_password">Login with Email/Password</string>
+    <string name="login_with_phone_number">Login with Phone Number</string>
+    <string name="login_error_msg">Login failed! Invalid email or password</string>
+    <string name="generic_error_msg">Something went wrong. Please try again later</string>
+    <string name="register_error_msg">Registration failed! This user may already registered with us</string>
+    <string name="enter_otp_des_text">Select your country code and enter your phone number to get OTP</string>
+    <string name="login_email_des_text">Enter your email and password to login into the app</string>
+
+    <string name="default_country_code">US</string>
+    <string name="field_required">Required</string>
+    <string name="field_invalid">Invalid</string>
+    <string name="otp_frg_tag">opt_frag</string>
+    <string name="resend_otp"><u>Resend OTP</u></string>
+    <string name="login_error">Login error, please try again later</string>
+    <string name="send_opt">Send OTP</string>
+    <string name="sending_opt">Sending OTP</string>
+    <string name="auto_retrieving_opt">Auto retrieving OTP</string>
+    <string name="otp_success">OTP sent successfully</string>
+    <string name="wrong_otp">Login error! You have entered wrong OTP</string>
+    <string name="verifying_code">Verifying code</string>
+    <string name="enter_otp"><u>Enter OTP</u></string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="forget_password_tag">forget_password_frg</string>
+    <string name="sign_up_des">Enter your details along with a valid email Id, to create your account</string>
+    <string name="password_error">Password must be of minimum 6 characters, no space, 1 special character</string>
+    <string name="login_progress">Logging in</string>
+    <string name="login_button">Login</string>
+    <string name="register_progress">Registering user</string>
+    <string name="register_now">Register Now</string>
+    <string name="resend_otp_error">Could not send you OTP at this time please try again later</string>
+    <string name="verify_email_first">Please verify your email first, check your inbox!</string>
+    <string name="verification_email_not_sent">Could not verify your account at this time, please check your email address.</string>
+
+    <string name="default_on_name">No Name</string>
+    <string name="user_data_update_tag">update_user_data_frg</string>
+    <string name="picture_tag">picture_frg</string>
+    <string name="logout">Logout</string>
+    <string name="search_tag">search_fragment</string>
+    <string name="puran_collection_name">puran_collection</string>
+    <string name="no_search_history">no search history</string>
+    <string name="view_all">more >></string>
+    <string name="favorite_key">favorite</string>
+    <string name="offline_key">offline</string>
+    <string name="parts_key">parts</string>
+
+
 </resources>

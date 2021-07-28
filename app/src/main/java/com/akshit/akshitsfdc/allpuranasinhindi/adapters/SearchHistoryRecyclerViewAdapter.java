@@ -1,6 +1,5 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -20,11 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.HardCopyBookDashboardActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SearchActivity;
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.SearchHardCopyActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -37,6 +35,7 @@ public class SearchHistoryRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
     public SearchHistoryRecyclerViewAdapter(ArrayList<String> historyList, Context mContext, EditText searchEditText) {
         this.historyList = historyList;
+        Collections.reverse(historyList);
         this.historyListCopy = new ArrayList<>(historyList);
         this.mContext = mContext;
         this.searchEditText = searchEditText;
@@ -58,11 +57,9 @@ public class SearchHistoryRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
         holder.parent.setOnClickListener(view -> {
             searchEditText.setText(search);
-            if(mContext instanceof HardCopyBookDashboardActivity){
-                navigateToSearchHardCopyActivity(search);
-            }else {
-                navigateToSearchActivity(search);
-            }
+
+            navigateToSearchActivity(search);
+
 
         });
 
@@ -73,12 +70,7 @@ public class SearchHistoryRecyclerViewAdapter extends RecyclerView.Adapter<Searc
         mContext.startActivity(intent);
         //finish();
     }
-    private void navigateToSearchHardCopyActivity(String key){
-        Intent intent = new Intent(mContext, SearchHardCopyActivity.class);
-        intent.putExtra("key", key);
-        mContext.startActivity(intent);
-        //finish();
-    }
+
     @Override
     public int getItemCount() {
         return historyList.size();

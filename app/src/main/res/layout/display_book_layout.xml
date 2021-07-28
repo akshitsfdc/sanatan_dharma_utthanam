@@ -1,76 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+    >
+<androidx.cardview.widget.CardView
+
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="0dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    app:cardCornerRadius="10dp"
+    android:layout_margin="@dimen/margin_display_items_start"
+    android:elevation="10dp"
+    >
     <RelativeLayout
-        android:id="@+id/bookImageOuter"
-        android:layout_width="75dp"
-        android:layout_height="100dp">
-        <androidx.cardview.widget.CardView
+        android:layout_width="@dimen/display_normal_layout_width"
+        android:layout_height="@dimen/display_normal_layout_height">
 
+        <ImageView
+            android:id="@+id/bookImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardCornerRadius="5dp"
+            android:src="@drawable/book_placeholder"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerCrop" />
+
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/grdient_up_down"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/grdient_down_up"
+            android:layout_height="40dp"/>
+
+        <ImageView
+            android:id="@+id/ribbonImage"
+            android:visibility="gone"
+            android:layout_width="@dimen/display_ribbon_prime_height"
+            android:layout_height="@dimen/display_ribbon_prime_height"
+            android:src="@drawable/ic_prime"
+            />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:padding="1dp"
+            android:background="@color/overlay_var"
             >
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="Book Name"
+                android:layout_centerInParent="true"
+                android:textColor="@color/colorWhiteSmoke"
+                android:textSize="14sp"
+                android:textAlignment="center"
 
-                <ImageView
-                    android:id="@+id/bookImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/book_placeholder"
-                    android:layout_centerHorizontal="true"
-                    android:scaleType="fitXY" />
-
-                <ProgressBar
-                    android:id="@+id/progress"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="true"
-
-                    android:layout_centerVertical="true"
-                    android:indeterminate="true"
-                    android:elevation="10dp"
-                    android:theme="@style/ProgressBarTheme"
-                    />
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:padding="1dp"
-                    android:background="@color/black_trans_for_display"
-                    >
-                    <TextView
-                        android:id="@+id/title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="Book Name"
-                        android:layout_centerInParent="true"
-                        android:textColor="@color/colorWhiteSmoke"
-                        android:textSize="8sp"
-                        android:textAlignment="center"
-
-                        />
-                </RelativeLayout>
-
-            </RelativeLayout>
-
-        </androidx.cardview.widget.CardView>
+                />
+        </RelativeLayout>
 
 
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="true"
+            app:trackColor="@color/loading_ma"
+            app:indicatorColor="@color/loading_mi"
+            app:trackThickness="@dimen/display_normal_layout_height"
+            />
 
 
     </RelativeLayout>
 
-
-
-</RelativeLayout>
+</androidx.cardview.widget.CardView>
+</LinearLayout>

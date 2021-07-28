@@ -1,9 +1,42 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="nav_header_height">75dp</dimen>
     <dimen name="margin_toolbar">15dp</dimen>
     <dimen name="margin_softbook">2dp</dimen>
 
     <dimen name="updesh_action_icon_size">20dp</dimen>
+
+    <dimen name="login_padding_h">25dp</dimen>
+    <dimen name="corner_radius_login_card">15dp</dimen>
+    <dimen name="login_textbox_corner">10dp</dimen>
+    <dimen name="padding_login_bg_box">25dp</dimen>
+    <dimen name="corner_radius_login_buttons">15dp</dimen>
+    <dimen name="margin_top_login_buttons">10dp</dimen>
+    <dimen name="extra_margin_login_card">25dp</dimen>
+    <dimen name="login_text_top_margin">60dp</dimen>
+    <dimen name="logo_login_margin_bottom">10dp</dimen>
+    <dimen name="label_10dp_h">10dp</dimen>
+    <dimen name="opt_parent_padding_v">25dp</dimen>
+    <dimen name="opt_edit_text_border">1dp</dimen>
+    <dimen name="margin_20dp_top">20dp</dimen>
+    <dimen name="snake_top_margin">50dp</dimen>
+    <dimen name="logo_width_login">200dp</dimen>
+    <dimen name="logo_height_login">20dp</dimen>
+    <dimen name="book_meta_size">14sp</dimen>
+    <dimen name="book_meta_dot_size">8dp</dimen>
+    <dimen name="book_meta_margins">8dp</dimen>
+    <dimen name="book_meta_dot_top">1dp</dimen>
+    <dimen name="favorite_button_size">32dp</dimen>
+
+    <dimen name="h1layout_height">150dp</dimen>
+    <dimen name="h2layout_height">100dp</dimen>
+    <dimen name="h2layout_width">220dp</dimen>
+    <dimen name="h3layout_height">90dp</dimen>
+    <dimen name="h3layout_width">160dp</dimen>
+    <dimen name="sq_layout_height">180dp</dimen>
+    <dimen name="home_banner_height">200dp</dimen>
+    <dimen name="margin_display_items_start">5dp</dimen>
+    <dimen name="display_normal_layout_height">200dp</dimen>
+    <dimen name="display_normal_layout_width">150dp</dimen>
+    <dimen name="display_ribbon_prime_height">40dp</dimen>
 </resources>

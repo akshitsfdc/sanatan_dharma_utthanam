@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#2B90FF</color>
     <color name="white">#ffffff</color>
 
     <color name="colorWhiteSmoke">#F7F7F7</color>
     <color name="colorUnderline">#F4F4F5</color>
 
-    <color name="black">#000000</color>
     <color name="grey">#A9A9A9</color>
     <color name="black_trans">#23000000</color>
     <color name="off_notification_color">#6C7071</color>
@@ -16,7 +12,6 @@
     <color name="color_leaderboard_green">#0F9D58</color>
     <color name="color_leaderboard_yellow">#F4B400</color>
     <color name="color_leaderboard_blue">#4285F4</color>
-    <color name="color_leaderboard_red">#DB4437</color>
 
     <color name="color_leaderboard_red_trans">#6DDB4437</color>
 
@@ -36,5 +31,34 @@
     <color name="gYellow_trans">#3EF4B400</color>
 
 
-    <color name="black_trans_for_display">#23000000</color>
+    <!--    <color name="primary">#4285F4</color>-->
+    <color name="primary">#4285F4</color>
+    <color name="primary_var">#2E70DD</color>
+    <color name="secondary">#0F9D58</color>
+    <color name="secondary_var">#00DA6F</color>
+    <color name="warn">#DB4437</color>
+
+
+    <color name="brand_black">#353535</color>
+
+
+    <color name="accent">#0F9D58</color>
+
+    <color name="overlay">#59000000</color>
+    <color name="overlay_dark">#BF000000</color>
+    <color name="overlay_var">#26000000</color>
+    <color name="black">#353535</color>
+
+    <color name="smoke_white">#F7F7F7</color>
+
+    <color name="primary_trans">#804285F4</color>
+    <color name="primary_trans_10">#1A4285F4</color>
+    <color name="accent_trans_25">#400F9D58</color>
+
+    <color name="loading_ma">#E1E1E1</color>
+    <color name="loading_mi">#F3F0F0</color>
+
+    <color name="dark_blue">#3949AB</color>
+
+
 </resources>

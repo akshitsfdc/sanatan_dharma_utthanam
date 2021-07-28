@@ -56,7 +56,6 @@ public class PostFragment extends Fragment {
     private FileUtils fileUtils;
     private ProgressBar progress;
     private RelativeLayout fragmentParent;
-    public ProfileUpdateFragment profileUpdateFragment;
 
     public PostFragment() {
         // Required empty public constructor
@@ -83,29 +82,11 @@ public class PostFragment extends Fragment {
         view.findViewById(R.id.backImageView).setOnClickListener(v -> {
             closeFragment();
         });
-        view.findViewById(R.id.editProfile).setOnClickListener(v -> {
-            showProfileUpdate();
-        });
-        view.findViewById(R.id.editProfileOuterLayout).setOnClickListener(v -> {
-            showProfileUpdate();
-        });
+
         setPublisherView();
         return view;
     }
 
-    private void showProfileUpdate(){
-        try{
-            profileUpdateFragment = new ProfileUpdateFragment(this);
-            FragmentManager manager = getActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.add(R.id.fragmentParent, profileUpdateFragment,"profile_fragment");
-            transaction.addToBackStack(null);
-            transaction.commit();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
     public void setPublisherView(){
 
         if(!fileUtils.isNetworkConnected()){

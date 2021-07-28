@@ -1,19 +1,14 @@
 package com.akshit.akshitsfdc.allpuranasinhindi.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +16,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,15 +23,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.HardCopyBookDashboardActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.HomeActivity;
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.MainActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SearchActivity;
-import com.akshit.akshitsfdc.allpuranasinhindi.activities.SearchHardCopyActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SoftPuranaDashboardActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.activities.SplashActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.adapters.SearchHistoryRecyclerViewAdapter;
@@ -49,7 +39,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 
 
@@ -90,11 +79,8 @@ public class SearchFragment extends Fragment {
                     if(SplashActivity.APP_INFO != null && SplashActivity.APP_INFO.isSaveSearchAnalytics()){
                         saveSearchAnalytics(key);
                     }
-                    if(activity instanceof HardCopyBookDashboardActivity){
-                        navigateToSearchHardCopyActivity(key);
-                    }else{
-                        navigateToSearchActivity(key);
-                    }
+
+                    navigateToSearchActivity(key);
 
                 }
 
@@ -134,10 +120,10 @@ public class SearchFragment extends Fragment {
         try{
             SearchAnalytics searchAnalytics = new SearchAnalytics();
 
-            searchAnalytics.setName(MainActivity.USER_DATA.getName());
-            searchAnalytics.setUserId(MainActivity.USER_DATA.getuId());
-            searchAnalytics.setEmail(MainActivity.USER_DATA.getEmail());
-            searchAnalytics.setPrime(MainActivity.USER_DATA.isPrimeMember());
+            searchAnalytics.setName(SplashActivity.USER_DATA.getName());
+            searchAnalytics.setUserId(SplashActivity.USER_DATA.getuId());
+            searchAnalytics.setEmail(SplashActivity.USER_DATA.getEmail());
+            searchAnalytics.setPrime(SplashActivity.USER_DATA.isPrimeMember());
             searchAnalytics.setTimestamp(System.currentTimeMillis());
             searchAnalytics.setSearchedKeyword(key);
 
@@ -153,12 +139,6 @@ public class SearchFragment extends Fragment {
         }
 
     }
-    private void navigateToSearchHardCopyActivity(String key){
-        Intent intent = new Intent(activity, SearchHardCopyActivity.class);
-        intent.putExtra("key", key);
-        startActivity(intent);
-        //finish();
-    }
     public void showSoftKeyboard(Activity activity, View view) {
         InputMethodManager inputMethodManager = (InputMethodManager)activity. getSystemService(Activity.INPUT_METHOD_SERVICE);
         view.requestFocus();
@@ -171,13 +151,8 @@ public class SearchFragment extends Fragment {
         activity = requireActivity();
         showSoftKeyboard(activity, searchEditText);
 
-        if(activity instanceof HardCopyBookDashboardActivity){
-            searchHistoryCollectionName = "hard_item_search_history_collection";
-            analyticsCollectionName = "search_analytics_physical";
-        }else{
-            searchHistoryCollectionName = "soft_book_search_history_collection";
-            analyticsCollectionName = "search_analytics_digital";
-        }
+        searchHistoryCollectionName = "soft_book_search_history_collection";
+        analyticsCollectionName = "search_analytics_digital";
         try {
             linearLayoutManager = new LinearLayoutManager(getContext());
             recyclerView.setLayoutManager(linearLayoutManager);
@@ -283,8 +258,6 @@ public class SearchFragment extends Fragment {
                 manager.popBackStack();
                 if(activity instanceof HomeActivity){
                     ((HomeActivity)activity).showToolBar();
-                }else if(activity instanceof HardCopyBookDashboardActivity){
-                    ((HardCopyBookDashboardActivity)activity).showToolBar();
                 }else {
                     ((SoftPuranaDashboardActivity)activity).showToolBar();
                 }

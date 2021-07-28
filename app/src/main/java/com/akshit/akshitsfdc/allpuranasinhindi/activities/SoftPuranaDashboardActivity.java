@@ -2,18 +2,17 @@ package com.akshit.akshitsfdc.allpuranasinhindi.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,23 +25,19 @@ import android.widget.RelativeLayout;
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
 import com.akshit.akshitsfdc.allpuranasinhindi.adapters.SoftCopyRecyclerViewAdapter;
 import com.akshit.akshitsfdc.allpuranasinhindi.fragments.SearchFragment;
-import com.akshit.akshitsfdc.allpuranasinhindi.models.BookDisplaySliderModel;
+import com.akshit.akshitsfdc.allpuranasinhindi.models.DisplayModel;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
+import com.akshit.akshitsfdc.allpuranasinhindi.service.SQLService;
 import com.akshit.akshitsfdc.allpuranasinhindi.utils.FileUtils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,31 +55,26 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
     private SoftCopyRecyclerViewAdapter adapter;
 
-    private ArrayList<SoftCopyModel> offlineBookModels;
-
-    private SoftCopyModel recentlyDeletedItem;
-    private int recentlyDeletedItemPosition;
-
-    private boolean snackbarActive;
     private RelativeLayout emptyView;
     private boolean fromHome;
 
-
-    //pagination
-
-    private boolean loading = true;
+    private boolean loadAllowed = true;
     private final int listLimit = 8;
     private DocumentSnapshot lastVisible;
-    private boolean listended = false;
+    private boolean listEnded = false;
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
 
-    private GridLayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager;
 
     private Toolbar toolbar;
 
     private CardView toolbarCard;
 
     private RelativeLayout lazyProgress;
+    private SQLService sqlService;
+
+
+    private DisplayModel displayModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,11 +86,13 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         View contentView = inflater.inflate(R.layout.activity_soft_purana_dashboard, null, false);
         drawer.addView(contentView, 0);
         //drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        uiUtils.setSnakebarView(getSnakBarView(findViewById(R.id.snakebarLayout)));
 
-        if(MainActivity.USER_DATA.getPurchasedBooks() == null){
-            MainActivity.USER_DATA.setPurchasedBooks(new ArrayList<SoftCopyModel>());
+        if(SplashActivity.USER_DATA != null && SplashActivity.USER_DATA.getPurchasedBooks() == null){
+            SplashActivity.USER_DATA.setPurchasedBooks(new ArrayList<SoftCopyModel>());
         }
 
+        sqlService = new SQLService(this);
         progress = findViewById(R.id.progress);
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -110,14 +102,6 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         lazyProgress = findViewById(R.id.lazyProgress);
 
         fileUtils = new FileUtils(SoftPuranaDashboardActivity.this);
-
-        mLayoutManager = new GridLayoutManager(SoftPuranaDashboardActivity.this, 2);
-        recyclerView.setLayoutManager(mLayoutManager);
-
-        recyclerView.addItemDecoration(new DividerItemDecoration(SoftPuranaDashboardActivity.this,
-                DividerItemDecoration.VERTICAL));
-        recyclerView.addItemDecoration(new DividerItemDecoration(SoftPuranaDashboardActivity.this,
-                DividerItemDecoration.HORIZONTAL));
 
 
         toolbarCard = findViewById(R.id.toolbarCard);
@@ -161,42 +145,51 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
 
-        try {
-           type = getIntent().getExtras().getString("type");
-            fromHome = getIntent().getExtras().getBoolean("fromHome");
-            if(TextUtils.equals(type, "parts")){
-                SoftCopyModel softCopyModel = (SoftCopyModel) getIntent().getSerializableExtra("softCopyModel");
-                if(softCopyModel.getBookParts() == null || softCopyModel.getBookParts().size() <= 0){
-                    fileUtils.showShortToast("No parts available");
-                    emptyView.setVisibility(View.VISIBLE);
-                }else {
-                    //populateList(softCopyModel.getBookParts());
-                    loadBookParts(softCopyModel.getBookParts());
-                }
+        initRecyclerView();
 
-            }else if(fromHome){
-                String id = getIntent().getExtras().getString("scrollToId");
-                ArrayList<String> idList = new ArrayList<String>();
-                idList.add(id);
-                loadBookParts(idList);
-            }else {
-                loadBooks(type);
-            }
+        boolean singleBook = (boolean)routing.getParam("singleBook");
 
-        }catch (Exception e){
-            e.printStackTrace();
-            loadBooks("purans");
+        if(singleBook){
+            singleBookFlow();
+        }else {
+            multiBookFlow();
         }
 
-        changePrime();
-
-        if(TextUtils.equals(type, "offline")) {
+        if(TextUtils.equals(type, getString(R.string.offline_key))) {
             ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
             itemTouchHelper.attachToRecyclerView(recyclerView);
         }
 
 
 
+    }
+
+    private void multiBookFlow(){
+
+
+
+        type = (String) routing.getParam("type");
+
+        fromHome = (boolean) routing.getParam("fromHome");
+
+        try {
+            displayModel = (DisplayModel)routing.getParam("displayModel");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        if(!TextUtils.equals(type, getString(R.string.offline_key)) && !TextUtils.equals(type, getString(R.string.favorite_key))){
+            showLoading();
+        }
+
+        loadBooks();
+    }
+
+    private void singleBookFlow(){
+        SoftCopyModel softCopyModel = (SoftCopyModel) routing.getParam("softCopyModel");
+        List<SoftCopyModel> softCopyModels = new ArrayList<>();
+        softCopyModels.add(softCopyModel);
+        adapter.addData(softCopyModels);
     }
 
     @Override
@@ -228,15 +221,6 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
     }
 
-    private void changePrime(){
-        if(!MainActivity.USER_DATA.isPrimeMember()){
-            Menu nav_Menu = navigationView.getMenu();
-            nav_Menu.findItem(R.id.nav_prime).setVisible(true);
-            super.headerView.findViewById(R.id.primeIndicator).setVisibility(View.GONE);
-        }
-
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -248,12 +232,9 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
         searchItem.setVisible(true);
 
-        searchItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                showSearchFragment();
-                return false;
-            }
+        searchItem.setOnMenuItemClickListener(menuItem -> {
+            showSearchFragment();
+            return false;
         });
         return true;
     }
@@ -261,12 +242,10 @@ public class SoftPuranaDashboardActivity extends MainActivity {
     public void onBackPressed() {
 
         showToolBar();
-
-        if(snackbarActive){
-            deleteBookFiles(recentlyDeletedItem);
-            deleteFromRecent(recentlyDeletedItem);
+        boolean frgRem = removeFragmentFirst();
+        if(frgRem){
+            return;
         }
-
         if (super.drawer.isDrawerOpen(GravityCompat.START)) {
             super.drawer.closeDrawer(GravityCompat.START);
         }else {
@@ -280,216 +259,245 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
     }
 
-    private void loadBookParts(List<String> parts){
+    private void loadBooks(){
 
-        if(!fileUtils.isNetworkConnected()){
-            fileUtils.showLongToast("You are not connected to the internet.");
-            findViewById(R.id.internetLostView).setVisibility(View.VISIBLE);
-            return;
-        }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
-            return;
-        }
-
-        showPB(true);
-
-        Query query = db.collection("digital_books")
-                .whereIn("bookId", parts)
-                .orderBy("priority").limit(listLimit);
-
-        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                hidePB(true);
-                if(queryDocumentSnapshots.size() <= 0){
-
-                    fileUtils.showLongToast("No result found of this type.");
-                    emptyView.setVisibility(View.VISIBLE);
-                    // hidePB(true);
-                    listended = true;
-                    loading = true;
-                    return;
-                }
-
-                // Get the last visible document
-                lastVisible = queryDocumentSnapshots.getDocuments()
-                        .get(queryDocumentSnapshots.size()-1 );
-
-                ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
-                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                    softCopyModels.add(document.toObject(SoftCopyModel.class));
-                }
-                populateList(softCopyModels);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                hidePB(true);
-                e.printStackTrace();
-            }
-        });
-    }
-    private void loadBooks(String document){
-
-        if(TextUtils.equals(type, "offline")){
-            offlineBookModels = loadOfflineBooks();
-            if(offlineBookModels.size() <= 0){
-                fileUtils.showLongToast("You have not downloaded any book yet.");
-                emptyView.setVisibility(View.VISIBLE);
-            }else{
-                populateList(offlineBookModels);
-            }
-            return;
-        }
-
-        if(TextUtils.equals(type, "favorite_books")){
-            ArrayList<SoftCopyModel> softCopyModels = loadFavBooks();
-            if(softCopyModels.size() <= 0){
-                fileUtils.showLongToast("You have not added any favorite yet.");
-                emptyView.setVisibility(View.VISIBLE);
-            }else{
-                populateList(softCopyModels);
-            }
+        if(ifOfflineMode()){
             return;
         }
 
         paginationScroll();
 
-        if(!fileUtils.isNetworkConnected()){
-            fileUtils.showLongToast("You are not connected to the internet.");
-            findViewById(R.id.internetLostView).setVisibility(View.VISIBLE);
-            return;
-        }
-        if(currentUser == null){
-            fileUtils.showLongToast("You are not logged in, please log in again..");
-            return;
-        }
-
-        showPB(true);
-
         Query query;
 
-        if(TextUtils.equals(document, "all")){
-             query = db.collection("digital_books")
-                    .whereEqualTo("isOneOfThePart", false)
-                    .orderBy("priority").limit(listLimit);
+        if(fromHome){
+            query = getQueryForHome();
+        }else if(TextUtils.equals(type, getString(R.string.parts_key))){
+            query = getQueryForParts();
         }else {
-            query = db.collection("digital_books")
-                    .whereEqualTo("type", document)
-                    .whereEqualTo("isOneOfThePart", false)
-                    .orderBy("priority").limit(listLimit);
+            query = getQueryForDashBoard();
         }
 
-
-        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                hidePB(true);
-                if(queryDocumentSnapshots.size() <= 0){
-
-                    fileUtils.showLongToast("No result found of this type.");
-                    emptyView.setVisibility(View.VISIBLE);
-                   // hidePB(true);
-                    listended = true;
-                    loading = true;
-                    return;
-                }
-
-                // Get the last visible document
-                lastVisible = queryDocumentSnapshots.getDocuments()
-                        .get(queryDocumentSnapshots.size()-1 );
-
-                ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
-                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                    softCopyModels.add(document.toObject(SoftCopyModel.class));
-                }
-                populateList(softCopyModels);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                hidePB(true);
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private void loadMore(){
-
-        Log.d(TAG, "loadMore: >> type : "+type);
-        Query query;
-
-
-        if(lastVisible == null){
-            return;
-        }
-
-        if(TextUtils.equals(type, "all")){
-            query = db.collection("digital_books")
-                    .whereEqualTo("isOneOfThePart", false)
-                    .orderBy("priority")
-                    .startAfter(lastVisible)
-                    .limit(listLimit);
-        }else {
-            query = db.collection("digital_books")
-                    .whereEqualTo("type", type)
-                    .whereEqualTo("isOneOfThePart", false)
-                    .orderBy("priority")
-                    .startAfter(lastVisible)
-                    .limit(listLimit);
-        }
-
-
-
-       showLazyProgress();
+        showLazyProgress();
         query.get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot documentSnapshots) {
+                .addOnSuccessListener(documentSnapshots -> {
 
-                        hideLazyProgress();
 
-                        if(documentSnapshots.size() <= 0){
-                            fileUtils.showShortToast("End of the list!");
-                            listended = true;
-                            loading = true;
-                            return;
-                        }
-                        // Get the last visible document
+                    if(documentSnapshots.size() <= 0){
+                        endList();
+                        return;
+                    }
+                    if(shouldEndList(documentSnapshots.getDocuments().size())){
+                        endList();
+                    }else {
                         lastVisible = documentSnapshots.getDocuments()
-                                .get(documentSnapshots.size()-1 );
-
-                        ArrayList<SoftCopyModel> softCopyModels = new ArrayList<>();
-                        for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                                .get(documentSnapshots.size() - 1 );
+                    }
+                    List<SoftCopyModel> softCopyModels = new ArrayList<>();
+                    for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                        if(document != null){
                             softCopyModels.add(document.toObject(SoftCopyModel.class));
                         }
-
-                        adapter.addData(softCopyModels);
-                        loading = true;
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                hideLazyProgress();
-                fileUtils.showShortToast("Load failed!");
-                loading = true;
-            }
-        });
 
+                    if(softCopyModels.size() > 0){
+                        adapter.addData(softCopyModels);
+                    }
 
+                    loadAllowed = true;
+                    hideLazyProgress();
+                    hideLoading();
+                }).addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    hideLazyProgress();
+                    hideLoading();
+                });
     }
-    private void populateList(ArrayList<SoftCopyModel> softCopyModels){
 
-        if(softCopyModels.size() <= 0){
-            emptyView.setVisibility(View.VISIBLE);
+    private boolean ifOfflineMode(){
+
+
+        if(TextUtils.equals(type, getString(R.string.offline_key))){
+            List<SoftCopyModel> offlineBookModels = sqlService.showOfflineBooks(null);
+
+            if(offlineBookModels != null){
+                if(offlineBookModels.size() > 0){
+                    uiUtils.showShortSuccessSnakeBar("Swipe left to delete books");
+                }
+                adapter.addData(offlineBookModels);
+            }
+
+            return true;
         }
-        adapter = new SoftCopyRecyclerViewAdapter(SoftPuranaDashboardActivity.this, softCopyModels);
+
+        if(TextUtils.equals(type, getString(R.string.favorite_key))){
+            List<SoftCopyModel> softCopyModels = sqlService.showFavoriteBooks(null);
+            if(softCopyModels != null){
+                adapter.addData(softCopyModels);
+            }
+            return true;
+        }
+        return false;
+    }
+    private boolean shouldEndList(int totalItemCount){
+        if(fromHome){
+            if(totalItemCount <  displayModel.getLimit()){
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            if(totalItemCount <  listLimit){
+                return true;
+            }else {
+                return false;
+            }
+        }
+    }
+
+    private void endList(){
+        lastVisible = null;
+        listEnded = true;
+        loadAllowed = false;
+        hideLazyProgress();
+        hideLoading();
+    }
+
+    private Query getQueryForDashBoard(){
+
+        String bookCollection = "digital_books";
+
+        Query query;
+
+        if(lastVisible != null){
+            if(TextUtils.equals(type, "all")){
+                query = db.collection(bookCollection)
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("priority")
+                        .startAfter(lastVisible)
+                        .limit(listLimit);
+            }else {
+                query = db.collection("digital_books")
+                        .whereEqualTo("type", type)
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("priority")
+                        .startAfter(lastVisible)
+                        .limit(listLimit);
+            }
+        }else {
+
+            if(TextUtils.equals(type, "all")){
+                query = db.collection("digital_books")
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("priority").limit(listLimit);
+            }else {
+                query = db.collection("digital_books")
+                        .whereEqualTo("type", type)
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("priority").limit(listLimit);
+            }
+        }
+
+
+        return query;
+    }
+
+    private Query getQueryForHome(){
+
+        String bookCollection = "digital_books";
+
+        String displayKey = displayModel.getDisplayKey().toLowerCase();
+
+        Query query;
+
+        if(TextUtils.equals(displayKey, "new")){
+
+            if(lastVisible != null){
+                query = this.fireStoreService.getDB().collection(bookCollection)
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("addedTime", Query.Direction.DESCENDING)
+                        .startAfter(lastVisible)
+                        .limit(displayModel.getLimit());
+            }else {
+                query = this.fireStoreService.getDB().collection(bookCollection)
+                        .whereEqualTo("isOneOfThePart", false)
+                        .orderBy("addedTime", Query.Direction.DESCENDING)
+                        .limit(displayModel.getLimit());
+            }
+
+        }else {
+            if(lastVisible != null){
+                query = this.fireStoreService.getDB().collection(bookCollection)
+                        .whereArrayContains("displayKeys", displayKey)
+                        .orderBy("addedTime", Query.Direction.DESCENDING)
+                        .startAfter(lastVisible)
+                        .limit(displayModel.getLimit());
+            }else {
+                query = this.fireStoreService.getDB().collection(bookCollection)
+                        .whereArrayContains("displayKeys", displayKey)
+                        .orderBy("addedTime", Query.Direction.DESCENDING)
+                        .limit(displayModel.getLimit());
+            }
+
+
+        }
+
+        return query;
+    }
+
+    private Query getQueryForParts(){
+
+        String bookCollection = "digital_books";
+
+
+
+        SoftCopyModel softCopyModel = (SoftCopyModel) routing.getParam("softCopyModel");
+
+        if(softCopyModel == null){
+           return null;
+        }
+        Query query;
+
+
+        if(lastVisible != null){
+
+            query = db.collection(bookCollection)
+                    .whereIn("bookId", softCopyModel.getBookParts())
+                    .orderBy("priority")
+                    .startAfter(lastVisible)
+                    .limit(listLimit);
+        }else {
+
+            query = db.collection(bookCollection)
+                    .whereIn("bookId", softCopyModel.getBookParts())
+                    .orderBy("priority")
+                    .limit(listLimit);
+        }
+
+
+
+
+        return query;
+    }
+
+    public void checkEmptyList(List<SoftCopyModel> softCopyModels){
+        if(softCopyModels != null && softCopyModels.size() == 0){
+            emptyView.setVisibility(View.VISIBLE);
+        }else {
+            emptyView.setVisibility(View.GONE);
+        }
+    }
+
+    private void initRecyclerView(){
+
+        mLayoutManager = new LinearLayoutManager(this);
+
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        adapter = new SoftCopyRecyclerViewAdapter(this, new ArrayList<>());
 
         recyclerView.setAdapter(adapter);
     }
+
 
     private void paginationScroll(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -500,11 +508,11 @@ public class SoftPuranaDashboardActivity extends MainActivity {
                     totalItemCount = mLayoutManager.getItemCount();
                     pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
 
-                    if (loading) {
+                    if (loadAllowed) {
                         if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
-                            loading = false;
-                            if(!listended){
-                               loadMore();
+                            loadAllowed = false;
+                            if(!listEnded){
+                               loadBooks();
                             }
                         }
                     }
@@ -529,99 +537,8 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         }
 
     }
-    private ArrayList<SoftCopyModel> loadOfflineBooks() {
 
-        ArrayList<SoftCopyModel> offlineBookList;
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("offlineBookList", null);
-        Type type = new TypeToken<ArrayList<SoftCopyModel>>() {}.getType();
-        offlineBookList = gson.fromJson(json, type);
-
-        if (offlineBookList == null) {
-            offlineBookList = new ArrayList<>();
-        }
-
-        return offlineBookList;
-    }
-
-    private ArrayList<SoftCopyModel> loadFavBooks() {
-
-        ArrayList<SoftCopyModel> favList;
-
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("favoriteBookList", null);
-        Type type = new TypeToken<ArrayList<SoftCopyModel>>() {}.getType();
-        favList = gson.fromJson(json, type);
-
-        if (favList == null) {
-            favList = new ArrayList<>();
-        }
-
-        return favList;
-    }
-
-    private SoftCopyModel getOfflineBookReference(ArrayList<SoftCopyModel> softCopyModels, SoftCopyModel bookModel){
-        SoftCopyModel book = null;
-
-        for(SoftCopyModel softCopyModel : softCopyModels){
-            if(TextUtils.equals(softCopyModel.getBookId(), bookModel.getBookId())){
-                book = softCopyModel;
-                break;
-            }
-        }
-
-        return book;
-    }
-    private void deleteOffline(SoftCopyModel offlineBook) {
-
-        ArrayList<SoftCopyModel> offlineBookList = loadOfflineBooks();
-
-        SoftCopyModel bookModel = getOfflineBookReference(offlineBookList, offlineBook);
-
-        if(bookModel != null){
-            if(offlineBookList.contains(bookModel)){
-                offlineBookList.remove(bookModel);
-            }
-        }
-        SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(offlineBookList);
-        editor.putString("offlineBookList", json);
-        editor.apply();
-    }
-
-    private void deleteBookFiles(SoftCopyModel softCopyModel){
-
-        String bookName = softCopyModel.getFileName();
-
-        String fileName = bookName+".pdf";
-
-        File folder = fileUtils.getFolder("puran_collection");
-
-        final File file = new File(folder, fileName);
-
-        boolean deleteResult = false;
-        if(file.exists()){
-
-            try{
-                deleteResult = file.getAbsoluteFile().delete();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
-        }
-
-        if(deleteResult){
-            Log.d(TAG, "deleteBookFiles: File deleted!");
-        }
-    }
-
-    ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+    ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -633,15 +550,10 @@ public class SoftPuranaDashboardActivity extends MainActivity {
 
             try {
                 int position = viewHolder.getAdapterPosition();
-                SoftCopyModel softCopyModel = offlineBookModels.get(position);
-                recentlyDeletedItem = softCopyModel;
-                recentlyDeletedItemPosition = position;
-
-                deleteOffline(softCopyModel);
-                showUndoSnackbar(softCopyModel);
-
-                offlineBookModels.remove(position);
-                adapter.notifyDataSetChanged();
+                if(adapter != null){
+                    SoftCopyModel softCopyModel = adapter.getBookByPosition(position);
+                    exitWarning(softCopyModel);
+                }
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -649,132 +561,40 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         }
     };
 
-    private void showUndoSnackbar(SoftCopyModel softCopyModel) {
+    private void deleteFromList(SoftCopyModel softCopyModel){
 
-        try {
-            snackbarActive = true;
-            View view = findViewById(R.id.parent);
-            Snackbar snackbar = Snackbar.make(view, "Undo delete ? ",
-                    Snackbar.LENGTH_LONG);
-            snackbar.setAction("Undo", v -> undoDelete());
-            snackbar.addCallback(new Snackbar.Callback(){
-                @Override
-                public void onDismissed(Snackbar snackbar, int event) {
-                    snackbarActive = false;
-                    if (event != Snackbar.Callback.DISMISS_EVENT_ACTION){
-                        deleteBookFiles(softCopyModel);
-                        deleteFromRecent(softCopyModel);
-                    }
-                }
-
-                @Override
-                public void onShown(Snackbar snackbar) {
-
-                }
-            });
-            snackbar.show();
-        }catch (Exception e){
-            e.printStackTrace();
+        if(adapter != null){
+            adapter.removeData(softCopyModel);
         }
+    }
+    private void exitWarning(SoftCopyModel softCopyModel){
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure, you want to delete "+softCopyModel.getName()+" from your phone?")
+                .setCancelable(true)
+                .setPositiveButton("Yes, Delete It", (dialog, id) -> {
+                    deleteFromList(softCopyModel);
+                    deleteFromMemory(softCopyModel);
+                })
+                .setNegativeButton("Cancel", (dialogInterface, i) -> {
+                    adapter.notifyDataSetChanged();
+                })
+                .show();
+    }
+
+
+    private void deleteFromMemory(SoftCopyModel softCopyModel){
+
+
+        fileUtils.deleteFileFromUri(softCopyModel.getBookUri());
+        fileUtils.deleteFileFromUri(softCopyModel.getCoverUri());
+
+        int result = sqlService.deleteOfflineBook(softCopyModel.getBookId());
+
+        adapter.notifyDataSetChanged();
 
     }
 
-    private void undoDelete() {
 
-        try {
-            snackbarActive = false;
-            offlineBookModels.add(recentlyDeletedItemPosition,
-                    recentlyDeletedItem);
-            saveDataAt(recentlyDeletedItem, recentlyDeletedItemPosition);
-
-            adapter.notifyDataSetChanged();
-        }catch (Exception e){
-
-        }
-
-    }
-
-    private void saveDataAt(SoftCopyModel offlineBook, int position) {
-
-        try {
-            ArrayList<SoftCopyModel> offlineBookList = loadOfflineBooks();
-
-            offlineBookList.add(position, offlineBook);
-
-            SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-
-            Gson gson = new Gson();
-            String json = gson.toJson(offlineBookList);
-            editor.putString("offlineBookList", json);
-            editor.apply();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
-    private void deleteFromRecent(SoftCopyModel softCopyModel){
-
-        try{
-
-            ArrayList<BookDisplaySliderModel> bookDisplaySliderModels = loadContinueReadingList();
-
-            int bookIndex = bookDisplaySliderModelIndex(bookDisplaySliderModels, softCopyModel.getBookId());
-
-            if( bookIndex != -1){
-                bookDisplaySliderModels.remove(bookIndex);
-            }
-            SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(bookDisplaySliderModels);
-            editor.putString("bookDisplaySliderModels", json);
-            editor.apply();
-
-            SplashActivity.DISPLAY_UPDATE_NOTIFIER = true;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
-    private ArrayList<BookDisplaySliderModel> loadContinueReadingList(){
-
-        try {
-            ArrayList<BookDisplaySliderModel> bookDisplaySliderModels;
-
-            SharedPreferences sharedPreferences = getSharedPreferences("offline_book_list", MODE_PRIVATE);
-            Gson gson = new Gson();
-            String json = sharedPreferences.getString("bookDisplaySliderModels", null);
-            Type type = new TypeToken<ArrayList<BookDisplaySliderModel>>() {}.getType();
-            bookDisplaySliderModels = gson.fromJson(json, type);
-
-            if (bookDisplaySliderModels == null) {
-                bookDisplaySliderModels = new ArrayList<>();
-            }
-            return bookDisplaySliderModels;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
-    }
-
-    private int bookDisplaySliderModelIndex(ArrayList<BookDisplaySliderModel> bookDisplaySliderModels, String bookId){
-
-        try {
-            for (int i = 0; i < bookDisplaySliderModels.size(); ++i){
-                if(TextUtils.equals(bookId, bookDisplaySliderModels.get(i).getBookId())){
-                    return i;
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        return -1;
-    }
 
     private void showLazyProgress(){
         lazyProgress.setVisibility(View.VISIBLE);
@@ -787,6 +607,11 @@ public class SoftPuranaDashboardActivity extends MainActivity {
         toolbarCard.setVisibility(View.GONE);
     }
     public void showToolBar(){
+
         toolbarCard.setVisibility(View.VISIBLE);
+
+        if(adapter != null){
+            adapter.notifyDataSetChanged();
+        }
     }
 }

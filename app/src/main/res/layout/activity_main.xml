@@ -5,10 +5,17 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+
     android:background="@color/white"
     tools:openDrawer="start">
 
+    <include
+        android:id="@+id/snakebarLayout"
+        android:layout_marginBottom="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/top_snakbar_layout" />
 
 <!--    <include-->
 <!--        layout="@layout/app_bar_main"-->
@@ -21,11 +28,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
         app:itemIconTint="@color/drawer_item"
         app:itemTextColor="@color/drawer_item"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
+
 
 
 </androidx.drawerlayout.widget.DrawerLayout>

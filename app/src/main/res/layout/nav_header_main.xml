@@ -1,46 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/nav_header_height"
-    android:background="@color/white"
-    android:gravity="bottom"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:elevation="20dp"
+    android:layout_height="wrap_content"
+    android:background="@color/smoke_white"
+    app:cardBackgroundColor="@color/smoke_white"
+    android:elevation="10dp"
     >
 
 
-    <ImageView
-        android:layout_above="@+id/line"
-        android:layout_width="180dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="16dp"
-        android:src="@drawable/purana_logo_new"
-        />
-    <ImageView
-        android:id="@+id/primeIndicator"
-        android:layout_above="@+id/line"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:src="@drawable/ic_prime_icon_24"
-        />
-   <!-- <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:text="@string/nav_header_title"
-        android:textColor="@color/off_notification_color"
-        android:textSize="16sp" />-->
-<View
-    android:id="@+id/line"
-    android:layout_alignParentBottom="true"
-    android:layout_width="match_parent"
-    android:background="#DCDCDC"
-    android:layout_height="0.5dp"/>
-</RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/profileNavView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/activity_vertical_margin"
+            >
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/profileCard"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    app:cardCornerRadius="40dp"
+                    android:layout_margin="5dp"
+                    >
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                    <ImageView
+                        android:id="@+id/profileImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile_placeholder"
+                        />
+
+                        <TextView
+                            android:id="@+id/editProfile"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="5dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/roboto_bold"
+                            android:background="@color/primary_trans"
+                            android:textAlignment="center"
+                            android:textColor="@color/white"
+                            android:layout_alignParentBottom="true"
+                            android:textSize="8sp"
+                            android:text="Edit"
+                            />
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+
+
+
+
+
+            <LinearLayout
+                android:layout_toEndOf="@+id/profileCard"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_bold"
+                    android:textSize="16sp"
+                    android:text="User Name"
+                    />
+                <TextView
+                    android:id="@+id/userId"
+                    android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="10sp"
+                    android:fontFamily="@font/roboto_light"
+                    />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/primeIndicator"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_prime_icon_24"
+                android:visibility="gone"
+                />
+
+        </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/loginNavView"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:visibility="gone"
+        >
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/accent_trans_25"
+            >
+
+        </View>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loginButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Login"
+            />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

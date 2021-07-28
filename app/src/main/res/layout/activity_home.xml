@@ -11,11 +11,9 @@
         android:id="@+id/toolbarCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_toolbar"
-        android:layout_marginStart="@dimen/margin_toolbar"
-        android:layout_marginEnd="@dimen/margin_toolbar"
-        android:layout_marginBottom="0dp"
-        app:cardCornerRadius="15dp"
+
+
+
         >
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -26,7 +24,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorWhiteSmoke"
+                android:background="@color/white"
                 app:popupTheme="@style/AppTheme.PopupOverlay" >
 
                 <ImageView
@@ -41,52 +39,104 @@
 
 
 
-    <ImageView
-        android:id="@+id/loadingImage"
-        android:layout_below="@+id/toolbarCard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <RelativeLayout
+        android:id="@+id/mainView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
-        android:layout_above="@+id/bannerContainer"
+        android:layout_below="@+id/toolbarCard"
+        android:layout_above="@+id/addContainer"
         >
 
-        <androidx.recyclerview.widget.RecyclerView
+
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_toolbar"
-            android:layout_marginEnd="@dimen/margin_toolbar"
-            android:id="@+id/recycler_view"
+            >
 
-            />
+            <LinearLayout
+                android:id="@+id/scrollViewInnerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+
+
+                    <com.smarteist.autoimageslider.SliderView
+                        android:id="@+id/imageSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/home_banner_height"
+                        app:sliderAnimationDuration="600"
+                        app:sliderAutoCycleDirection="back_and_forth"
+                        app:sliderAutoCycleEnabled="true"
+                        app:sliderIndicatorAnimationDuration="600"
+                        app:sliderIndicatorGravity="center_horizontal|bottom"
+                        app:sliderIndicatorMargin="15dp"
+                        app:sliderIndicatorOrientation="horizontal"
+                        app:sliderIndicatorPadding="2dp"
+                        app:sliderIndicatorMarginBottom="3dp"
+                        app:sliderIndicatorRadius="1.5dp"
+                        app:sliderIndicatorSelectedColor="@color/colorWhiteSmoke"
+                        app:sliderIndicatorUnselectedColor="@color/dot_unselect_color"
+                        app:sliderScrollTimeInSec="8"
+                        app:sliderStartAutoCycle="true"
+                        />
+
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
         <RelativeLayout
             android:id="@+id/internetLostView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/recycler_view"
             android:visibility="gone"
             >
 
-            <ImageView
-                android:layout_width="160dp"
-                android:layout_height="249dp"
-                android:src="@drawable/ic_lost_internet"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:layout_centerInParent="true"
-                android:scaleType="centerInside"
-                />
+                >
+                <ImageView
+                    android:layout_width="160dp"
+                    android:layout_height="249dp"
+                    android:src="@drawable/ic_lost_internet"
+
+                    android:scaleType="centerInside"
+                    />
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/noInternetButton"
+                    app:cornerRadius="15dp"
+                    android:text="Offline Books"
+                    />
+            </LinearLayout>
+
         </RelativeLayout>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/bannerContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
 
-    </RelativeLayout>
+    <include
+        android:id="@+id/snakebarLayout"
+        android:layout_marginBottom="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/top_snakbar_layout" />
+
+    <LinearLayout
+        android:id="@+id/addContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        />
 </RelativeLayout>

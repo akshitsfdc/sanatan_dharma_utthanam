@@ -18,12 +18,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.akshit.akshitsfdc.allpuranasinhindi.R;
+import com.akshit.akshitsfdc.allpuranasinhindi.activities.BaseActivity;
+import com.akshit.akshitsfdc.allpuranasinhindi.activities.LoginActivity;
 import com.akshit.akshitsfdc.allpuranasinhindi.fragments.CommentFragment;
 import com.akshit.akshitsfdc.allpuranasinhindi.fragments.PostFragment;
 import com.akshit.akshitsfdc.allpuranasinhindi.models.SoftCopyModel;
@@ -47,16 +50,18 @@ public class UpdeshRecyclerViewAdapter extends RecyclerView.Adapter<UpdeshRecycl
 
 
     private  ArrayList<UpdeshModel> updeshModels;
-    private Context mContext;
+    private AppCompatActivity mContext;
     private FirebaseUser currentUser;
     private FileUtils fileUtils;
     private UpdeshModel currentUpadeshModel;
+    private BaseActivity baseActivity;
 
-    public UpdeshRecyclerViewAdapter(Context context, ArrayList<UpdeshModel> updeshModels) {
+    public UpdeshRecyclerViewAdapter(AppCompatActivity context, ArrayList<UpdeshModel> updeshModels) {
         this.updeshModels = updeshModels;
         mContext = context;
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         fileUtils = new FileUtils(mContext);
+        baseActivity = (BaseActivity)mContext;
     }
     public void addData(ArrayList<UpdeshModel> updeshModels){
         this.updeshModels.addAll(updeshModels);
@@ -93,6 +98,9 @@ public class UpdeshRecyclerViewAdapter extends RecyclerView.Adapter<UpdeshRecycl
         if(isAlreadyLiked(updeshModel)){
             holder.likeText.setTextColor(mContext.getResources().getColor(R.color.gblue));
             holder.likeImage.setImageResource(R.drawable.ic_hert_filled);
+        }else {
+            holder.likeText.setTextColor(mContext.getResources().getColor(R.color.off_notification_color));
+            holder.likeImage.setImageResource(R.drawable.ic_heart_empty);
         }
         String text;
 
@@ -149,8 +157,11 @@ public class UpdeshRecyclerViewAdapter extends RecyclerView.Adapter<UpdeshRecycl
 
     private void setPublisherView(UpdeshRecyclerViewAdapter.ViewHolder holder, UpdeshModel updeshModel){
 
+        String picUrl = updeshModel.getUpdeshakPicId() == null ? "":updeshModel.getUpdeshakPicId();
+
         holder.updeshakNameText.setText(updeshModel.getUpdeshakName());
-        Glide.with(mContext).load(updeshModel.getUpdeshakPicId()).listener(new RequestListener<Drawable>() {
+
+        Glide.with(mContext).load(picUrl).listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 return false;
@@ -198,6 +209,10 @@ public class UpdeshRecyclerViewAdapter extends RecyclerView.Adapter<UpdeshRecycl
             fileUtils.showShortToast("You are not connected to the internet.");
             return;
         }
+        if(!baseActivity.fireAuthService.isUserLoggedIn()){
+            baseActivity.routing.navigate(LoginActivity.class, false);
+            return;
+        }
 
         if(isAlreadyLiked(updeshModel)){
             unlikeUpdesh(holder, updeshModel);
@@ -207,10 +222,19 @@ public class UpdeshRecyclerViewAdapter extends RecyclerView.Adapter<UpdeshRecycl
 
     }
     private void commentAction(UpdeshModel updeshModel){
+        if(!baseActivity.fireAuthService.isUserLoggedIn()){
+            baseActivity.routing.navigate(LoginActivity.class, false);
+            return;
+        }
         startCommentFragment(updeshModel);
     }
 
     private void shareAction(UpdeshRecyclerViewAdapter.ViewHolder holder, UpdeshModel updeshModel){
+
+        if(!baseActivity.fireAuthService.isUserLoggedIn()){
+            baseActivity.routing.navigate(LoginActivity.class, false);
+            return;
+        }
 
         int SHARE_INTENT_CODE = 101;
         this.currentUpadeshModel = updeshModel;

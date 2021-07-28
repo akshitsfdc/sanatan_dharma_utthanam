@@ -2,24 +2,20 @@ package com.akshit.akshitsfdc.allpuranasinhindi.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserDataModel implements Serializable {
 
     private String name;
     private String email;
     private String uId;
-    private ArrayList<SoftCopyModel> purchasedBooks;
+    private List<SoftCopyModel> purchasedBooks;
     private boolean primeMember;
+    private long createdTime;
+    private String phone;
+    private String photoUrl;
 
     public UserDataModel() {
-    }
-
-    public UserDataModel(String name, String email, String uId, ArrayList<SoftCopyModel> purchasedBooks, boolean primeMember) {
-        this.setName(name);
-        this.setEmail(email);
-        this.setuId(uId);
-        this.setPurchasedBooks(purchasedBooks);
-        this.setPrimeMember(primeMember);
     }
 
     public String getName() {
@@ -46,13 +42,6 @@ public class UserDataModel implements Serializable {
         this.uId = uId;
     }
 
-    public ArrayList<SoftCopyModel> getPurchasedBooks() {
-        return purchasedBooks;
-    }
-
-    public void setPurchasedBooks(ArrayList<SoftCopyModel> purchasedBooks) {
-        this.purchasedBooks = purchasedBooks;
-    }
 
     public boolean isPrimeMember() {
         return primeMember;
@@ -60,5 +49,38 @@ public class UserDataModel implements Serializable {
 
     public void setPrimeMember(boolean primeMember) {
         this.primeMember = primeMember;
+    }
+
+
+    public List<SoftCopyModel> getPurchasedBooks() {
+        return purchasedBooks;
+    }
+
+    public void setPurchasedBooks(List<SoftCopyModel> purchasedBooks) {
+        this.purchasedBooks = purchasedBooks;
+    }
+
+    public long getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(long createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }
